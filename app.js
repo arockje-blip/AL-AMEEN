@@ -92,6 +92,208 @@ STORAGE_KEYS.reviews = "al_ameen_reviews";
 STORAGE_KEYS.customers = "al_ameen_customers";
 STORAGE_KEYS.admins = "al_ameen_admins";
 
+const FIREBASE_CONFIG = window.FIREBASE_CONFIG || {
+  apiKey: "AIzaSyDToHas8Id_5BiotcRirE222DR8ki93b88",
+  authDomain: "squares-of-mystery.firebaseapp.com",
+  projectId: "squares-of-mystery",
+  storageBucket: "squares-of-mystery.firebasestorage.app",
+  messagingSenderId: "91483191813",
+  appId: "1:91483191813:web:382e0b48e199bd11823a6c",
+  measurementId: "G-24DMRX54Y6",
+};
+
+const FIREBASE_COLLECTIONS = {
+  dashboard: "site_dashboard",
+  projects: "site_projects",
+  clients: "site_customers",
+  gallery: "site_gallery",
+  reviews: "site_reviews",
+  feedback: "site_feedback",
+  admins: "site_admins",
+  settings: "site_settings",
+};
+
+let cloudDb = null;
+
+function initFirebaseClient() {
+  try {
+    if (!window.firebase || !FIREBASE_CONFIG.apiKey) return null;
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    cloudDb = firebase.firestore();
+    return cloudDb;
+  } catch {
+    cloudDb = null;
+    return null;
+  }
+}
+
+function cloudReady() {
+  return Boolean(cloudDb);
+}
+
+function mapProjectDoc(doc) {
+  return {
+    title: doc.title || "",
+    client: doc.client || "",
+    location: doc.location || "",
+    status: doc.status || "Planned",
+    note: doc.note || "",
+    createdAt: doc.createdAt || new Date().toISOString(),
+  };
+}
+
+function mapClientDoc(doc, idFallback = "") {
+  return {
+    customerId: normalizeCustomerId(doc.customerId || idFallback),
+    name: doc.name || "",
+    phone: doc.phone || "",
+    category: doc.category || "",
+    createdAt: doc.createdAt || new Date().toISOString(),
+  };
+}
+
+function mapGalleryDoc(doc) {
+  return {
+    title: doc.title || "",
+    note: doc.note || "",
+    year: doc.year || "",
+    createdAt: doc.createdAt || new Date().toISOString(),
+  };
+}
+
+function mapReviewDoc(doc, idFallback = "") {
+  return {
+    customerId: normalizeCustomerId(doc.customerId || idFallback),
+    name: doc.name || "Anonymous",
+    phone: doc.phone || "",
+    service: doc.service || "",
+    satisfaction: Math.max(1, Math.min(100, parseInt(doc.satisfaction || "100", 10))),
+    message: doc.message || "",
+    createdAt: doc.createdAt || new Date().toISOString(),
+  };
+}
+
+async function loadCollectionDocs(collectionName) {
+  if (!cloudDb) return [];
+  try {
+    const snapshot = await cloudDb.collection(collectionName).get();
+    return snapshot.docs.map((document) => ({ id: document.id, ...document.data() }));
+  } catch {
+    return [];
+  }
+}
+
+async function setCollectionDoc(collectionName, docId, payload) {
+  if (!cloudDb) return false;
+  try {
+    await cloudDb.collection(collectionName).doc(docId).set(payload, { merge: true });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function addCollectionDoc(collectionName, payload) {
+  if (!cloudDb) return false;
+  try {
+    await cloudDb.collection(collectionName).add(payload);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function syncPublicCloudData() {
+  if (!cloudDb) return;
+  const [dashboardDocs, projectsDocs, galleryDocs, reviewsDocs, feedbackDocs] = await Promise.all([
+    loadCollectionDocs(FIREBASE_COLLECTIONS.dashboard),
+    loadCollectionDocs(FIREBASE_COLLECTIONS.projects),
+    loadCollectionDocs(FIREBASE_COLLECTIONS.gallery),
+    loadCollectionDocs(FIREBASE_COLLECTIONS.reviews),
+    loadCollectionDocs(FIREBASE_COLLECTIONS.feedback),
+  ]);
+
+  const remoteStats = dashboardDocs[0] || {};
+  State.dashboard.stats = {
+    ...State.dashboard.stats,
+    projects: remoteStats.projects ?? State.dashboard.stats.projects,
+    experience: remoteStats.experience ?? State.dashboard.stats.experience,
+    clients: remoteStats.clients ?? State.dashboard.stats.clients,
+    satisfaction: remoteStats.satisfaction ?? State.dashboard.stats.satisfaction,
+  };
+
+  if (projectsDocs.length) State.dashboard.projects = projectsDocs.map(mapProjectDoc);
+  if (galleryDocs.length) State.dashboard.gallery = galleryDocs.map(mapGalleryDoc);
+  if (reviewsDocs.length) State.reviews = reviewsDocs.map((doc) => mapReviewDoc(doc, doc.id));
+  if (feedbackDocs.length) State.feedbacks = feedbackDocs.map((doc) => mapReviewDoc(doc, doc.id));
+
+  persistDashboardData();
+  persistReviewsData();
+  persistFeedbackData();
+  refreshDashboardView();
+}
+
+async function syncAdminCloudData() {
+  if (!cloudDb) return;
+  const [clientsDocs, adminsDocs] = await Promise.all([
+    loadCollectionDocs(FIREBASE_COLLECTIONS.clients),
+    loadCollectionDocs(FIREBASE_COLLECTIONS.admins),
+  ]);
+
+  if (clientsDocs.length) State.customers = clientsDocs.map((doc) => mapClientDoc(doc, doc.id));
+  if (adminsDocs.length) State.admins = adminsDocs.map((doc) => ({ user: doc.user || "admin", pass: doc.pass || "admin123" }));
+
+  persistCustomersData();
+  persistAdminsData();
+  refreshDashboardView();
+}
+
+async function writeStatsToCloud() {
+  if (!cloudDb) return;
+  await setCollectionDoc(FIREBASE_COLLECTIONS.dashboard, "main", { ...State.dashboard.stats, updatedAt: new Date().toISOString() });
+}
+
+async function writeProjectToCloud(project) {
+  if (!cloudDb) return;
+  await addCollectionDoc(FIREBASE_COLLECTIONS.projects, { ...project, createdAt: new Date().toISOString() });
+  await writeStatsToCloud();
+}
+
+async function writeClientToCloud(client) {
+  if (!cloudDb) return;
+  await setCollectionDoc(FIREBASE_COLLECTIONS.clients, client.customerId, { ...client, createdAt: new Date().toISOString() });
+  await writeStatsToCloud();
+}
+
+async function writeGalleryToCloud(item) {
+  if (!cloudDb) return;
+  await addCollectionDoc(FIREBASE_COLLECTIONS.gallery, { ...item, createdAt: new Date().toISOString() });
+}
+
+async function writeReviewToCloud(review) {
+  if (!cloudDb) return;
+  await setCollectionDoc(FIREBASE_COLLECTIONS.reviews, review.customerId, review);
+}
+
+async function writeFeedbackToCloud(feedback) {
+  if (!cloudDb) return;
+  await setCollectionDoc(FIREBASE_COLLECTIONS.feedback, feedback.customerId, feedback);
+}
+
+async function writeAdminToCloud(admins) {
+  if (!cloudDb) return;
+  const activeAdmin = admins[0] || { user: "admin", pass: "admin123" };
+  await setCollectionDoc(FIREBASE_COLLECTIONS.admins, activeAdmin.user || "admin", activeAdmin);
+}
+
+async function writeSettingsToCloud() {
+  if (!cloudDb) return;
+  await setCollectionDoc(FIREBASE_COLLECTIONS.settings, "main", {
+    experience: State.dashboard.stats.experience ?? 0,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 function createDefaultDashboard() {
   return {
     stats: {
@@ -2412,6 +2614,7 @@ function init() {
   const root = document.getElementById("root");
   if (!root) throw new Error("Missing #root container");
   injectStyles();
+  initFirebaseClient();
   document.documentElement.style.scrollBehavior = "smooth";
   document.body.style.overflow = "hidden";
   const loader = buildLoader();
@@ -2431,19 +2634,21 @@ function init() {
       animateHero();
       initParticles();
       initLiquidEffect();
-      showAdminLogin(() => {
-        // on success - replace main with hero + admin portal
-        const newMain = el("main", {}, buildHero(), buildAdminPortal());
-        mainAdmin.replaceWith(newMain);
-        document.body.style.overflow = "";
-        refreshDashboardView();
-        // Scroll to admin section after login
-        setTimeout(() => {
-          const adminSection = document.getElementById("admin");
-          if (adminSection) {
-            adminSection.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-        }, 200);
+      void syncAdminCloudData().finally(() => {
+        showAdminLogin(() => {
+          // on success - replace main with hero + admin portal
+          const newMain = el("main", {}, buildHero(), buildAdminPortal());
+          mainAdmin.replaceWith(newMain);
+          document.body.style.overflow = "";
+          refreshDashboardView();
+          // Scroll to admin section after login
+          setTimeout(() => {
+            const adminSection = document.getElementById("admin");
+            if (adminSection) {
+              adminSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }, 200);
+        });
       });
     });
     return;
@@ -2476,6 +2681,8 @@ function init() {
     initParticles();
     initLiquidEffect();
   });
+
+  void syncPublicCloudData();
 }
 
 function showAdminLogin(onSuccess) {
