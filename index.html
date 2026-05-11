@@ -7,67 +7,7 @@
     <title>Al Ameen Rolling Shutter</title>
   </head>
   <body>
-    <main class="hero">
-      <div class="liquid-wrap" aria-hidden>
-        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1">
-              <stop offset="0" stop-color="#5ee7df"/>
-              <stop offset="1" stop-color="#b490ca"/>
-            </linearGradient>
-            <filter id="wobble">
-              <feTurbulence baseFrequency="0.005" numOctaves="2" seed="2" result="t"/>
-              <feDisplacementMap in="SourceGraphic" in2="t" scale="30" xChannelSelector="R" yChannelSelector="G"/>
-            </filter>
-          </defs>
-          <g filter="url(#wobble)">
-            <path id="blob" fill="url(#g1)" d="M421,330Q382,410,297,397Q212,384,166,323Q120,262,176,198Q232,134,311,116Q390,98,435,154Q480,210,421,330Z"/>
-          </g>
-        </svg>
-      </div>
-
-      <div class="content">
-        <div class="card">
-          <h2>Sign Up</h2>
-          <form id="signup-form">
-            <label>Email<input type="email" name="email" required></label>
-            <label>Password<input type="password" name="password" required></label>
-            <button type="submit">Create account</button>
-            <div id="signup-msg" aria-live="polite"></div>
-          </form>
-
-          <hr style="margin:18px 0;border-color:rgba(255,255,255,0.06)">
-
-          <h2>Send Enquiry</h2>
-          <form id="enquiry-form">
-            <div class="row">
-              <label style="flex:1">Name<input name="name" required></label>
-              <label style="flex:1">Email<input name="email" type="email" required></label>
-            </div>
-            <label>Message<textarea name="message" rows="4" required></textarea></label>
-            <button type="submit">Send</button>
-            <div id="enquiry-msg" aria-live="polite"></div>
-          </form>
-        </div>
-      </div>
-    </main>
-
+    <div id="root"></div>
     <script src="app.js"></script>
-    <script>
-      // gentle path morph to simulate liquid motion
-      (function animateBlob(){
-        const p = document.getElementById('blob');
-        let t=0;
-        function step(){
-          t+=0.02;
-          const a = 20*Math.sin(t*1.2);
-          const b = 18*Math.cos(t*0.9);
-          const d = `M421,330Q${382+a},${410-b},297,397Q212,384,166,323Q120,262,176,198Q232,134,311,116Q390,98,435,154Q480,210,421,330Z`;
-          p.setAttribute('d',d);
-          requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
-      })();
-    </script>
   </body>
 </html>

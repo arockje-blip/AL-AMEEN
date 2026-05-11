@@ -2168,51 +2168,9 @@ function animateHero() {
   }
 }
 
-function attachFallbackHandlers() {
-  // Lightweight handlers for simple static index.html forms
-  const signup = document.getElementById('signup-form');
-  if (signup) {
-    signup.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const f = new FormData(signup);
-      const email = f.get('email')?.toString() || '';
-      const password = f.get('password')?.toString() || '';
-      const msg = document.getElementById('signup-msg');
-      try {
-        const res = await fetch('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
-        const j = await res.json();
-        msg.textContent = j.message || (res.ok ? 'Account created' : 'Error');
-      } catch (err) {
-        msg.textContent = 'Network error';
-      }
-    });
-  }
-
-  const enquiry = document.getElementById('enquiry-form');
-  if (enquiry) {
-    enquiry.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const f = new FormData(enquiry);
-      const payload = { name: f.get('name')?.toString()||'', email: f.get('email')?.toString()||'', message: f.get('message')?.toString()||'' };
-      const msg = document.getElementById('enquiry-msg');
-      try {
-        const res = await fetch('/api/enquiry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        const j = await res.json();
-        msg.textContent = j.message || (res.ok ? 'Enquiry sent' : 'Error');
-        if (res.ok) enquiry.reset();
-      } catch (err) {
-        msg.textContent = 'Network error';
-      }
-    });
-  }
-}
-
 function init() {
   const root = document.getElementById("root");
-  if (!root) {
-    attachFallbackHandlers();
-    return;
-  }
+  if (!root) throw new Error("Missing #root container");
   injectStyles();
   document.documentElement.style.scrollBehavior = "smooth";
   document.body.style.overflow = "hidden";
