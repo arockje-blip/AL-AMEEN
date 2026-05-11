@@ -1538,7 +1538,7 @@ function injectStyles() {
       color: var(--accent);
     }
     .contact-value { white-space: pre-line; margin-top: 0.25rem; }
-    .contact-value a { color: #c7f4d7; text-decoration: underline; text-decoration-color: rgba(199,244,215,0.35); }
+    .contact-value a { color: var(--accent); text-decoration: underline; text-decoration-color: rgba(0, 208, 132, 0.35); }
     .contact-form { display: grid; gap: 1rem; }
     .contact-form-title {
       margin: 0;
