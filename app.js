@@ -972,26 +972,30 @@ function injectStyles() {
       transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     }
     .nav-cta, .btn-primary {
-      background: linear-gradient(135deg, var(--accent), #2cb6ff);
-      color: #051016;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #ffffff;
       padding: 0.9rem 1.25rem;
-      box-shadow: 0 16px 34px rgba(61, 220, 132, 0.22);
+      box-shadow: 0 8px 24px rgba(0, 208, 132, 0.3);
+      font-weight: 600;
     }
     .nav-cta:hover, .btn-primary:hover, .btn-outline:hover, .btn-whatsapp:hover, .footer-social-btn:hover, .float-whatsapp:hover, .float-call:hover {
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0, 208, 132, 0.4);
     }
     .btn-outline {
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.03);
+      border: 2px solid var(--text);
+      background: rgba(255,255,255,0.5);
       color: var(--text);
-      padding: 0.9rem 1.25rem;
+      padding: 0.85rem 1.2rem;
       backdrop-filter: blur(8px);
+      font-weight: 600;
     }
     .btn-whatsapp {
-      background: linear-gradient(135deg, #31c46b, #2dbd84);
-      color: #04120b;
+      background: linear-gradient(135deg, #25d366, #1eaa50);
+      color: #ffffff;
       padding: 0.9rem 1.25rem;
-      box-shadow: 0 16px 34px rgba(45, 189, 132, 0.2);
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
+      font-weight: 600;
     }
     .btn-secondary {
       background: rgba(255,255,255,0.12);
@@ -1118,15 +1122,16 @@ function injectStyles() {
       align-items: center;
       width: fit-content;
       gap: 0.5rem;
-      padding: 0.6rem 0.95rem;
+      padding: 0.8rem 1.2rem;
       border-radius: 999px;
-      border: 1px solid rgba(61,220,132,0.18);
-      background: rgba(61,220,132,0.08);
-      color: #c0f7d5;
-      font-size: 0.78rem;
+      border: 2px solid var(--accent);
+      background: linear-gradient(135deg, rgba(0, 208, 132, 0.12), rgba(0, 102, 255, 0.08));
+      color: var(--accent);
+      font-size: 0.85rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      text-transform: uppercase;
+      text-transform: capitalize;
+      box-shadow: 0 0 30px rgba(0, 208, 132, 0.2);
     }
     .hero-title {
       margin: 0;
@@ -1136,33 +1141,34 @@ function injectStyles() {
       line-height: 0.88;
       letter-spacing: -0.08em;
       text-transform: uppercase;
-      max-width: 9ch;
+      max-width: 11ch;
+      color: #0a1628;
     }
     .hero-title-line {
-      opacity: 0;
-      transform: translateY(22px);
       will-change: transform, opacity;
     }
     .hero-title .accent {
-      color: var(--accent);
-      text-shadow: 0 0 32px rgba(61,220,132,0.4);
+      font-weight: 900;
+      text-shadow: 0 0 40px rgba(0, 208, 132, 0.5);
     }
     .hero-sub {
       margin: 0;
-      max-width: 56ch;
+      max-width: 60ch;
       color: var(--muted);
-      font-size: clamp(1rem, 1.8vw, 1.25rem);
+      font-size: clamp(1rem, 1.8vw, 1.3rem);
       line-height: 1.8;
-      opacity: 0;
-      transform: translateY(18px);
+      font-weight: 500;
     }
     .hero-btns {
       display: flex;
       flex-wrap: wrap;
       gap: 0.9rem;
-      opacity: 0;
-      transform: translateY(18px);
     }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 20px rgba(0, 208, 132, 0.3); } 50% { box-shadow: 0 0 40px rgba(0, 208, 132, 0.6); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .hero-btns svg, .btn-primary svg, .btn-outline svg, .btn-whatsapp svg, .footer-social-btn svg, .float-whatsapp svg, .float-call svg, .nav-cta svg {
       width: 18px;
       height: 18px;
