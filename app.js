@@ -2205,6 +2205,45 @@ function buildFAQ() {
   );
 }
 
+function clearAllData() {
+  // Clear all localStorage data
+  localStorage.removeItem(STORAGE_KEYS.dashboard);
+  localStorage.removeItem(STORAGE_KEYS.feedback);
+  localStorage.removeItem(STORAGE_KEYS.reviews);
+  localStorage.removeItem(STORAGE_KEYS.customers);
+  localStorage.removeItem(STORAGE_KEYS.admins);
+  
+  // Reset State to defaults
+  State.dashboard = createDefaultDashboard();
+  State.feedbacks = [];
+  State.reviews = [];
+  State.customers = [];
+  State.admins = [{ user: "admin", pass: "admin123" }];
+  
+  // Persist default state
+  persistDashboardData();
+  persistFeedbackData();
+  persistReviewsData();
+  persistCustomersData();
+  persistAdminsData();
+  
+  // Push default admin to Firebase if connected
+  if (cloudDb) {
+    void pushDefaultAdminToCloud();
+  }
+  
+  refreshDashboardView();
+}
+
+function resetDatabase() {
+  if (confirm("Are you sure you want to reset the entire database? This will delete all projects, clients, gallery, feedback, and reviews. This action cannot be undone.")) {
+    if (confirm("This will permanently erase all data. Click OK again to confirm.")) {
+      clearAllData();
+      alert("Database has been reset to default state.");
+    }
+  }
+}
+
 function buildAdminPortal() {
   const projectName = el("input", { type: "text", class: "form-input", id: "adminProjectName", placeholder: "Project name", required: "" });
   const projectClient = el("input", { type: "text", class: "form-input", id: "adminProjectClient", placeholder: "Client name", required: "" });
@@ -2310,6 +2349,9 @@ function buildAdminPortal() {
       setTimeout(() => { adminPassMsg.style.display = "none"; }, 2200);
     }
   });
+
+  const adminResetMsg = el("div", { class: "form-success", id: "adminResetMsg", style: { display: "none", marginTop: "0.8rem" } }, "Database reset in progress...");
+  const adminResetBtn = el("button", { type: "button", class: "btn-outline", style: { width: "100%", justifyContent: "center", marginTop: "1rem", color: "#ff6b6b", borderColor: "#ff6b6b" }, onclick: () => resetDatabase() }, svg(ICONS.shield), "Reset Database");
 
   const adminCurrentUser = el("div", { class: "mini-item" },
     el("strong", {}, Array.isArray(State.admins) && State.admins.length > 0 ? (State.admins[0].user || "admin") : "admin"),
@@ -2453,7 +2495,7 @@ function buildAdminPortal() {
         el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Add Client"), clientForm),
         el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Add Gallery Item"), galleryForm),
         el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Update Experience"), statsForm),
-        el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Admin Settings"), adminPassForm, el("div", { class: "admin-mini-grid", style: { marginTop: "1rem" } }, adminCurrentUser))
+        el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Admin Settings"), adminPassForm, adminResetBtn, adminResetMsg, el("div", { class: "admin-mini-grid", style: { marginTop: "1rem" } }, adminCurrentUser))
       ),
       el("div", { class: "admin-stack" },
         el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Live Summary"), summary),
