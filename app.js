@@ -852,6 +852,7 @@ function injectStyles() {
       top: 0;
       left: 50%;
       transform: translateX(-50%);
+      transform-origin: top center;
       width: min(86vw, 640px);
       display: grid;
       gap: 8px;
@@ -867,6 +868,7 @@ function injectStyles() {
       border-radius: 999px;
       background: linear-gradient(90deg, rgba(61,220,132,0.18), rgba(255,255,255,0.12), rgba(61,220,132,0.16));
       border: 1px solid rgba(255,255,255,0.07);
+      will-change: transform, opacity;
     }
     .loader-text {
       margin: 0 0 1rem;
@@ -2193,7 +2195,7 @@ function buildSampleSection() {
   return el("section", { class: "sample-section" },
     el("div", { class: "sample-panel" },
       SectionLabel("Samples"),
-      watchReveal(el("h2", { class: "section-title" }, "A QUICK LOOK")),
+      watchReveal(el("h2", { class: "section-title" }, "PROJECT GALLERY")),
       watchReveal(el("p", { class: "section-desc" }, "Sample pictures from the work we do. Open the full gallery to view every photo in one place.")),
       el("div", { class: "sample-grid" }, ...samples.map((sample) =>
         watchReveal(el("div", { class: "sample-card" },
@@ -3050,10 +3052,20 @@ function runLoader(onComplete) {
   setTimeout(() => {
     const sparkInterval = setInterval(createSpark, 60);
     if (window.gsap) {
-      gsap.to(panel, { y: "-220px", duration: 1.4, ease: "power2.inOut", onComplete: () => { clearInterval(sparkInterval); gsap.to(logoBehind, { opacity: 1, y: 0, duration: 0.4 }); } });
+      const slats = panel.querySelectorAll(".shutter-slat");
+      const timeline = gsap.timeline({ defaults: { ease: "power2.inOut" } });
+      timeline.to(slats, { y: -18, opacity: 0, stagger: 0.035, duration: 0.45 }, 0);
+      timeline.to(panel, { y: "-245px", scaleY: 0.62, duration: 1.2 }, 0.08);
+      timeline.to(logoBehind, { opacity: 1, y: 0, duration: 0.45 }, 0.82);
+      timeline.add(() => clearInterval(sparkInterval), 0.82);
     } else {
-      panel.style.transform = "translateY(-220px)";
-      panel.style.transition = "transform 1.4s ease";
+      panel.style.transform = "translateX(-50%) translateY(-245px) scaleY(0.62)";
+      panel.style.transition = "transform 1.2s ease";
+      panel.querySelectorAll(".shutter-slat").forEach((slat, index) => {
+        slat.style.transition = `transform 0.45s ease ${index * 0.035}s, opacity 0.45s ease ${index * 0.035}s`;
+        slat.style.transform = "translateY(-18px)";
+        slat.style.opacity = "0";
+      });
       clearInterval(sparkInterval);
       logoBehind.style.opacity = "1";
       logoBehind.style.transform = "translateY(0)";
