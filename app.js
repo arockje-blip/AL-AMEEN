@@ -1212,7 +1212,7 @@ function injectStyles() {
     @keyframes pulseLine { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
 
     /* Lock intro visuals */
-    .lock-wrap { display: flex; gap: 2rem; align-items: center; width: min(100%, var(--max)); margin: 0 auto; }
+    .lock-wrap { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; width: min(100%, var(--max)); margin: 0 auto; }
     .lock-graphic { width: 180px; height: 180px; display: grid; place-items: center; color: #ffffff; }
     .lock-graphic svg { width: 140px; height: 140px; color: #ffffff; }
     .lock-caption { flex: 1; }
@@ -1284,6 +1284,60 @@ function injectStyles() {
       color: #e0f2ff;
       line-height: 1.5;
     }
+    .sample-section {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: 0 clamp(1.25rem, 3vw, 2rem) 1rem;
+    }
+    .sample-panel {
+      border: 1px solid rgba(0, 208, 132, 0.12);
+      background: linear-gradient(180deg, rgba(25, 50, 70, 0.9), rgba(15, 30, 48, 0.88));
+      border-radius: 28px;
+      padding: 1.25rem;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+    }
+    .sample-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .sample-card {
+      overflow: hidden;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .sample-card img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      display: block;
+    }
+    .sample-card p {
+      margin: 0;
+      padding: 0.9rem 1rem 1rem;
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .sample-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .gallery-link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.95rem 1.4rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 10px 28px rgba(0, 208, 132, 0.28);
+    }
+    .gallery-link-btn:hover { transform: translateY(-2px); }
     .marquee-track {
       display: flex;
       width: max-content;
@@ -2057,12 +2111,19 @@ function buildHero() {
     </svg>
   `;
 
-  const lockWrap = el("div", { class: "lock-wrap" }, el("div", { class: "lock-graphic" }, el("div", { innerHTML: lockSVG })),
-    el("div", { class: "lock-caption" }, el("h1", { class: "hero-title" },
-      el("span", { class: "hero-title-line", style: { animation: `slideUp 0.8s ease-out 0s both` } }, "WE OPEN THE LOCK"),
-      el("span", { class: "hero-title-line", style: { animation: `slideUp 0.8s ease-out 0.2s both` } }, "ON YOUR BUSINESS SECURITY"),
-    ),
-    el("p", { class: "hero-sub", style: { animation: "fadeIn 1s ease-out 0.6s both" } }, "Secure, automate and protect — professional rolling shutters with smart controls and lifetime support.")));
+  const lockGraphic = el("div", { class: "lock-graphic" });
+  lockGraphic.innerHTML = lockSVG;
+
+  const lockWrap = el("div", { class: "lock-wrap" },
+    lockGraphic,
+    el("div", { class: "lock-caption" },
+      el("h1", { class: "hero-title" },
+        el("span", { class: "hero-title-line", style: { animation: "slideUp 0.8s ease-out 0s both" } }, "WE OPEN THE LOCK"),
+        el("span", { class: "hero-title-line", style: { animation: "slideUp 0.8s ease-out 0.2s both" } }, "ON YOUR BUSINESS SECURITY")
+      ),
+      el("p", { class: "hero-sub", style: { animation: "fadeIn 1s ease-out 0.6s both" } }, "Secure, automate and protect — professional rolling shutters with smart controls and lifetime support.")
+    )
+  );
 
   const btnContact = el("a", { href: "#contact", class: "btn-primary", style: { animation: "slideInLeft 0.8s ease-out 0.9s both" } }, svg(ICONS.phone), "Get A Secure Quote");
   const btnWA = el("a", { href: BRAND.whatsapp, target: "_blank", rel: "noreferrer", class: "btn-whatsapp", style: { animation: "slideInLeft 0.8s ease-out 1.1s both" } }, svg(ICONS.whatsapp), "Chat Now");
@@ -2073,9 +2134,7 @@ function buildHero() {
   return el("section", { id: "hero" },
     el("div", { class: "hero-bg", style: { background: "linear-gradient(135deg, rgba(0, 208, 132, 0.06) 0%, rgba(0, 102, 255, 0.06) 100%)" } }),
     el("div", { class: "hero-grid" }),
-    lockWrap,
-    el("div", { class: "hero-content" }, badge, lockWrap, btns),
-    scrollHint
+    el("div", { class: "hero-content" }, badge, lockWrap, btns, scrollHint)
   );
 }
 
@@ -2134,6 +2193,32 @@ function buildIntroCards() {
     el("p", { class: "intro-card-desc" }, item.desc)
   ))));
   return el("section", { id: "intro-cards", class: "intro-cards-section" }, cards);
+}
+
+function buildSampleSection() {
+  const samples = [
+    { src: "images/highspeedrapiddoor.jpg", label: "High Speed Rapid Door" },
+    { src: "images/automaticboombarriers.jpg", label: "Automatic Boom Barrier" },
+    { src: "images/rollingshuttersidemotar.jpg", label: "Rolling Shutter Side Motor" },
+    { src: "images/grillshutter.jpg", label: "Grill Shutter" },
+  ];
+
+  return el("section", { class: "sample-section" },
+    el("div", { class: "sample-panel" },
+      SectionLabel("Samples"),
+      watchReveal(el("h2", { class: "section-title" }, "A QUICK LOOK")),
+      watchReveal(el("p", { class: "section-desc" }, "Sample pictures from the work we do. Open the full gallery to view every photo in one place.")),
+      el("div", { class: "sample-grid" }, ...samples.map((sample) =>
+        watchReveal(el("div", { class: "sample-card" },
+          el("img", { src: sample.src, alt: sample.label, loading: "lazy" }),
+          el("p", {}, sample.label)
+        ))
+      )),
+      el("div", { class: "sample-actions" },
+        el("a", { href: "gallery.html", class: "gallery-link-btn" }, svg(ICONS.image), "Open Main Gallery")
+      )
+    )
+  );
 }
 
 function buildProductCard(product, index) {
@@ -3063,6 +3148,7 @@ function init() {
     buildHero(),
     buildMarquee(),
     buildIntroCards(),
+    buildSampleSection(),
     buildAbout(),
     buildProducts(),
     buildServices(),
