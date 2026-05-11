@@ -235,8 +235,14 @@ async function syncPublicCloudData() {
 
 async function pushDefaultAdminToCloud() {
   if (!cloudDb) return;
-  const defaultAdmin = { user: "admin", pass: "admin123", createdAt: new Date().toISOString() };
+  const defaultAdmin = { 
+    user: "admin", 
+    pass: "admin123", 
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
   try {
+    // Update (or create if not exists) the "admin" document in site_admins collection
     await setCollectionDoc(FIREBASE_COLLECTIONS.admins, "admin", defaultAdmin);
     return true;
   } catch {
@@ -300,7 +306,17 @@ async function writeFeedbackToCloud(feedback) {
 async function writeAdminToCloud(admins) {
   if (!cloudDb) return;
   const activeAdmin = admins[0] || { user: "admin", pass: "admin123" };
-  await setCollectionDoc(FIREBASE_COLLECTIONS.admins, activeAdmin.user || "admin", activeAdmin);
+  const adminUsername = activeAdmin.user || "admin";
+  const adminPayload = {
+    user: adminUsername,
+    pass: activeAdmin.pass,
+    updatedAt: new Date().toISOString(),
+  };
+  // If createdAt doesn't exist, add it (for first time creation)
+  if (!activeAdmin.createdAt) {
+    adminPayload.createdAt = new Date().toISOString();
+  }
+  await setCollectionDoc(FIREBASE_COLLECTIONS.admins, adminUsername, adminPayload);
 }
 
 async function writeSettingsToCloud() {
@@ -2258,12 +2274,12 @@ function buildAdminPortal() {
       adminPassMsg.style.display = "block";
       return;
     }
-    // Update first admin's password
+    // Update existing admin's password (updates the "admin" document in Firebase)
     if (Array.isArray(State.admins) && State.admins.length > 0) {
       State.admins[0].pass = newPass;
       persistAdminsData();
       void writeAdminToCloud(State.admins);
-      adminPassMsg.textContent = "Password updated successfully.";
+      adminPassMsg.textContent = "Admin password updated successfully.";
       adminPassMsg.style.display = "block";
       adminPassForm.reset();
       setTimeout(() => { adminPassMsg.style.display = "none"; }, 2200);
