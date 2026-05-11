@@ -639,6 +639,48 @@ function injectStyles() {
       font-weight: 700;
     }
 
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1300;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      display: none;
+      place-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.open {
+      display: grid;
+      opacity: 1;
+    }
+    .modal-box {
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 28px;
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 32px 64px rgba(0,0,0,0.4);
+    }
+    .modal-title {
+      margin: 0 0 1rem;
+      font-size: 1.6rem;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 1.4rem;
+    }
+
     #hero {
       min-height: 100vh;
       padding: 8.5rem clamp(1.25rem, 3vw, 2rem) 4rem;
@@ -2356,16 +2398,13 @@ function animateHero() {
   const btns = document.querySelector(".hero-btns");
 
   if (window.gsap) {
-    gsap.to(lines, { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: "power3.out" });
-    gsap.to(sub, { y: 0, opacity: 1, duration: 0.7, delay: 0.6, ease: "power2.out" });
-    gsap.to(btns, { y: 0, opacity: 1, duration: 0.7, delay: 0.8, ease: "power2.out" });
+    if (lines.length > 0) gsap.to(lines, { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: "power3.out" });
+    if (sub) gsap.to(sub, { y: 0, opacity: 1, duration: 0.7, delay: 0.6, ease: "power2.out" });
+    if (btns) gsap.to(btns, { y: 0, opacity: 1, duration: 0.7, delay: 0.8, ease: "power2.out" });
   } else {
-    [lines, [sub], [btns]].flat().forEach((node) => {
-      if (node) {
-        node.style.opacity = "1";
-        node.style.transform = "translateY(0)";
-      }
-    });
+    lines.forEach((node) => { if (node) { node.style.opacity = "1"; node.style.transform = "translateY(0)"; } });
+    if (sub) { sub.style.opacity = "1"; sub.style.transform = "translateY(0)"; }
+    if (btns) { btns.style.opacity = "1"; btns.style.transform = "translateY(0)"; }
   }
 }
 
@@ -2396,7 +2435,15 @@ function init() {
         // on success - replace main with hero + admin portal
         const newMain = el("main", {}, buildHero(), buildAdminPortal());
         mainAdmin.replaceWith(newMain);
+        document.body.style.overflow = "";
         refreshDashboardView();
+        // Scroll to admin section after login
+        setTimeout(() => {
+          const adminSection = document.getElementById("admin");
+          if (adminSection) {
+            adminSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 200);
       });
     });
     return;
@@ -2433,11 +2480,11 @@ function init() {
 
 function showAdminLogin(onSuccess) {
   // Simple login overlay that matches site theme
-  const overlay = el("div", { class: "modal-overlay open", id: "adminLoginOverlay", style: { zIndex: 2000, display: "grid", placeItems: "center" } },
-    el("div", { class: "modal-box", style: { width: "min(520px, 92%)", textAlign: "left" } },
+  const overlay = el("div", { class: "modal-overlay open", id: "adminLoginOverlay", style: { zIndex: "2000", display: "grid", placeItems: "center", position: "fixed", inset: "0", backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)" } },
+    el("div", { class: "modal-box", style: { width: "min(520px, 92%)", textAlign: "left", position: "relative" } },
       el("h3", { class: "modal-title" }, "Admin Login"),
       el("p", { class: "section-desc" }, "Enter administrator credentials to access the Admin Data Hub."),
-      el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminUser" }, "Username"), el("input", { id: "adminUser", class: "form-input", placeholder: "admin" })),
+      el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminUser" }, "Username"), el("input", { id: "adminUser", class: "form-input", placeholder: "admin", type: "text" })),
       el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminPass" }, "Password"), el("input", { id: "adminPass", class: "form-input", type: "password", placeholder: "••••••" })),
       el("div", { style: { display: "flex", gap: "0.6rem", marginTop: "0.6rem" } }, el("button", { class: "btn-primary", id: "adminLoginBtn" }, "Sign in"), el("button", { class: "btn-outline", id: "adminCancelBtn" }, "Cancel")),
       el("div", { class: "form-success", id: "loginError", style: { display: "none", marginTop: "0.8rem" } }, "Invalid credentials")
@@ -2470,6 +2517,19 @@ function showAdminLogin(onSuccess) {
 
   document.getElementById("adminLoginBtn").addEventListener("click", attemptLogin);
   document.getElementById("adminCancelBtn").addEventListener("click", () => { overlay.remove(); });
+  
+  // Allow Enter key to submit login
+  const adminUserInput = document.getElementById("adminUser");
+  const adminPassInput = document.getElementById("adminPass");
+  adminPassInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") attemptLogin();
+  });
+  adminUserInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") attemptLogin();
+  });
+  
+  // Auto-focus on password field when page loads
+  setTimeout(() => { adminUserInput.focus(); }, 200);
 }
 
 document.addEventListener("DOMContentLoaded", init);
