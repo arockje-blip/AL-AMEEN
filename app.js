@@ -463,6 +463,29 @@ function normalizeCustomerId(value) {
   return value.trim().toUpperCase();
 }
 
+function getCustomerSequence(value) {
+  const normalized = normalizeCustomerId(value || "");
+  const match = normalized.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+function buildCustomerId(sequence) {
+  return `CUST-${String(sequence).padStart(3, "0")}`;
+}
+
+function getNextCustomerId() {
+  const highestSequence = State.customers.reduce((max, customer) => {
+    const sequence = getCustomerSequence(customer.customerId);
+    return sequence && sequence > max ? sequence : max;
+  }, 0);
+  return buildCustomerId(highestSequence + 1);
+}
+
+function findCustomerById(customerId) {
+  const normalized = normalizeCustomerId(customerId || "");
+  return State.customers.find((customer) => normalizeCustomerId(customer.customerId || "") === normalized) || null;
+}
+
 function formatListValue(value) {
   return value == null || value === "" ? "-" : value;
 }
@@ -562,6 +585,7 @@ function clearProjectEdit() {
 function clearClientEdit() {
   EditState.clientId = null;
   document.getElementById("adminClientForm").reset();
+  document.getElementById("adminClientId").value = getNextCustomerId();
   document.getElementById("adminClientBtn").textContent = "Add Client";
   document.getElementById("adminClientBtn").style.backgroundColor = "";
   document.getElementById("adminClientClearBtn").style.display = "none";
@@ -2205,14 +2229,15 @@ function buildAdminPortal() {
     projectFormMsg
   );
 
-  const clientId = el("input", { type: "text", class: "form-input", id: "adminClientId", placeholder: "Customer ID", required: "" });
+  const clientId = el("input", { type: "text", class: "form-input", id: "adminClientId", placeholder: "Auto-allocated Customer ID", value: getNextCustomerId(), readOnly: "" });
+  const clientIdNote = el("div", { class: "mini-note" }, "Customer IDs start from 1 and are assigned automatically.");
   const clientName = el("input", { type: "text", class: "form-input", id: "adminClientName", placeholder: "Customer name", required: "" });
   const clientPhone = el("input", { type: "tel", class: "form-input", id: "adminClientPhone", placeholder: "Phone number", required: "" });
   const clientCategory = el("input", { type: "text", class: "form-input", id: "adminClientCategory", placeholder: "Category / Type" });
   const clientFormMsg = el("div", { class: "form-success", id: "adminClientMsg" }, "Client saved.");
   const clientForm = el("form", { id: "adminClientForm" },
     el("div", { class: "form-row" },
-      el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminClientId" }, "Customer ID"), clientId),
+      el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminClientId" }, "Customer ID"), clientId, clientIdNote),
       el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminClientName" }, "Name"), clientName)
     ),
     el("div", { class: "form-row" },
@@ -2324,7 +2349,7 @@ function buildAdminPortal() {
 
   clientForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    const customerIdValue = normalizeCustomerId(clientId.value);
+    const customerIdValue = EditState.clientId ? normalizeCustomerId(clientId.value) : getNextCustomerId();
     const existingIndex = State.customers.findIndex((client) => normalizeCustomerId(client.customerId || "") === customerIdValue);
     const payload = {
       customerId: customerIdValue,
@@ -2355,6 +2380,7 @@ function buildAdminPortal() {
     refreshDashboardView();
     clientFormMsg.style.display = "block";
     clientForm.reset();
+    clientId.value = getNextCustomerId();
     setTimeout(() => { clientFormMsg.style.display = "none"; }, 2200);
   });
 
@@ -2474,6 +2500,12 @@ function buildCustomerFeedback() {
     event.preventDefault();
     const customerIdValue = normalizeCustomerId(customerId.value);
     if (!customerIdValue) return;
+    const matchedCustomer = findCustomerById(customerIdValue);
+    if (!matchedCustomer) {
+      feedbackMsg.textContent = "Customer ID not found. Add the customer in Admin first.";
+      feedbackMsg.style.display = "block";
+      return;
+    }
     if (State.feedbacks.some((item) => normalizeCustomerId(item.customerId || "") === customerIdValue)) {
       feedbackMsg.textContent = "This customer ID already has a feedback entry.";
       feedbackMsg.style.display = "block";
@@ -2491,18 +2523,6 @@ function buildCustomerFeedback() {
     };
 
     State.feedbacks.push(entry);
-    // ensure customer is registered in customers DB when they submit feedback
-    if (entry.customerId) {
-      const exists = State.customers.some((c) => normalizeCustomerId(c.customerId || "") === entry.customerId);
-      if (!exists) {
-        const customerPayload = { customerId: entry.customerId, name: entry.name, phone: entry.phone, category: entry.service || "" };
-        State.customers.push(customerPayload);
-        State.dashboard.stats.clients = (State.dashboard.stats.clients ?? 0) + 1;
-        persistCustomersData();
-        void writeClientToCloud(customerPayload);
-        persistDashboardData();
-      }
-    }
     const average = Math.round(State.feedbacks.reduce((sum, item) => sum + Number(item.satisfaction || 0), 0) / State.feedbacks.length);
     State.dashboard.stats.satisfaction = average;
     persistFeedbackData();
@@ -2521,8 +2541,10 @@ function buildCustomerFeedback() {
   // Also store review entries into the `reviews` database so testimonials show only when submitted online
   form.addEventListener("submit", (event) => {
     // entry object is created above; reuse the same values via form elements
+    const customerIdValue = normalizeCustomerId(customerId.value);
+    if (!findCustomerById(customerIdValue)) return;
     const review = {
-      customerId: normalizeCustomerId(customerId.value),
+      customerId: customerIdValue,
       name: customerName.value.trim() || "Anonymous",
       phone: customerPhone.value.trim(),
       service: serviceType.value.trim(),
