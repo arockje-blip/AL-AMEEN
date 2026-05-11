@@ -1212,6 +1212,64 @@ function injectStyles() {
       border-bottom: 1px solid rgba(255,255,255,0.06);
       background: rgba(255,255,255,0.02);
     }
+
+    #intro-cards { padding: 3rem var(--pad); }
+    .intro-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.5rem;
+      width: min(100%, var(--max));
+      margin: 0 auto;
+    }
+    .intro-card {
+      border: 1px solid rgba(0, 208, 132, 0.12);
+      background: linear-gradient(180deg, rgba(25, 50, 70, 0.9), rgba(15, 30, 48, 0.88));
+      border-radius: 24px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      display: grid;
+      place-items: center;
+      gap: 0.8rem;
+      min-height: 280px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .intro-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(0, 208, 132, 0.25);
+      box-shadow: 0 24px 64px rgba(0, 208, 132, 0.15);
+    }
+    .intro-card-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: rgba(0, 208, 132, 0.15);
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+    }
+    .intro-card-icon svg { width: 36px; height: 36px; }
+    .intro-card-stat {
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .intro-card-label {
+      margin: 0.3rem 0 0;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    .intro-card-desc {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #e0f2ff;
+      line-height: 1.5;
+    }
     .marquee-track {
       display: flex;
       width: max-content;
@@ -1262,7 +1320,7 @@ function injectStyles() {
       place-items: center;
       gap: 0.7rem;
       text-align: center;
-      color: #b8d8e8;
+      color: #e0f2ff;
     }
     .about-icon-card svg { width: 28px; height: 28px; color: var(--accent); }
     .about-img-frame, .why-visual, .contact-form, .map-frame { border-radius: var(--radius); padding: 1.25rem; }
@@ -1277,7 +1335,7 @@ function injectStyles() {
       padding: 1.2rem;
     }
     .stat-number, .counter-number { font-size: 2rem; font-weight: 900; letter-spacing: -0.05em; }
-    .stat-label, .counter-label { color: var(--muted); margin-top: 0.3rem; }
+    .stat-label, .counter-label { color: #d4e8f7; margin-top: 0.3rem; }
     .counter-val { font-variant-numeric: tabular-nums; }
 
     #products, #services, #testimonials, #gallery, #faq, #contact { padding-top: 0; }
@@ -1326,11 +1384,12 @@ function injectStyles() {
     .product-name, .service-name, .why-item-title, .author-name, .contact-label, .footer-col-title, .modal-title {
       font-weight: 800;
       letter-spacing: -0.03em;
+      color: #ffffff;
     }
     .product-name { font-size: 1.2rem; }
     .product-desc, .service-text, .testimonial-text, .why-item-desc, .gallery-note, .footer-tagline, .footer-credit, .contact-value, .modal-desc, .faq-a p {
       margin: 0;
-      color: var(--muted);
+      color: #d4e8f7;
       line-height: 1.7;
     }
     .product-tag {
@@ -1365,7 +1424,7 @@ function injectStyles() {
     .service-num {
       font-size: 0.8rem;
       font-weight: 900;
-      color: var(--accent-2);
+      color: #ff9500;
       letter-spacing: 0.18em;
     }
     .service-icon {
@@ -1606,7 +1665,7 @@ function injectStyles() {
       text-transform: uppercase;
       letter-spacing: 0.12em;
       font-size: 0.8rem;
-      color: #7eb5d4;
+      color: #ffffff;
       font-weight: 800;
     }
     .admin-mini-grid {
@@ -1818,7 +1877,7 @@ function injectStyles() {
       .nav-links, .nav-cta { display: none; }
       .hamburger { display: inline-flex; }
       .about-grid, .why-grid, .contact-grid { grid-template-columns: 1fr; }
-      .products-grid, .services-grid, .testimonials-grid, .gallery-grid, .counters-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .products-grid, .services-grid, .testimonials-grid, .gallery-grid, .counters-grid, .intro-cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .admin-grid, .feedback-grid { grid-template-columns: 1fr; }
       .admin-summary, .feedback-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .footer-grid { grid-template-columns: 1fr 1fr; }
@@ -1827,7 +1886,7 @@ function injectStyles() {
       .hero-content { text-align: left; }
       .hero-title { max-width: 100%; }
       .hero-btns { flex-direction: column; align-items: stretch; }
-      .products-grid, .services-grid, .testimonials-grid, .gallery-grid, .counters-grid, .about-stats, .modal-specs, .admin-summary, .feedback-overview { grid-template-columns: 1fr; }
+      .products-grid, .services-grid, .testimonials-grid, .gallery-grid, .counters-grid, .intro-cards-grid, .about-stats, .modal-specs, .admin-summary, .feedback-overview { grid-template-columns: 1fr; }
       .form-row, .footer-grid { grid-template-columns: 1fr; }
       .footer-bottom { flex-direction: column; }
       .section-title { font-size: clamp(2rem, 10vw, 3.4rem); }
@@ -2037,6 +2096,22 @@ function buildAbout() {
   ));
 
   return el("section", { id: "about" }, el("div", { class: "about-grid" }, left, watchReveal(el("div", { class: "about-visual" }, frame))));
+}
+
+function buildIntroCards() {
+  const introCards = [
+    { icon: ICONS.shield, stat: "24+", label: "Years of Excellence", desc: "Trusted by thousands across Tamil Nadu" },
+    { icon: ICONS.check, stat: "⚡", label: "Lightning Fast", desc: "Installation in hours, not days" },
+    { icon: ICONS.tool, stat: "🎯", label: "100% Guarantee", desc: "Complete after-sales support included" },
+    { icon: ICONS.star, stat: "🏆", label: "Award Winning", desc: "Industry leaders in automation" },
+  ];
+  const cards = el("div", { class: "intro-cards-grid" }, ...introCards.map((item) => watchReveal(el("div", { class: "intro-card" },
+    el("div", { class: "intro-card-icon" }, svg(item.icon)),
+    el("div", { class: "intro-card-stat" }, item.stat),
+    el("h3", { class: "intro-card-label" }, item.label),
+    el("p", { class: "intro-card-desc" }, item.desc)
+  ))));
+  return el("section", { id: "intro-cards", class: "intro-cards-section" }, cards);
 }
 
 function buildProductCard(product, index) {
@@ -2965,6 +3040,7 @@ function init() {
   const main = el("main", {},
     buildHero(),
     buildMarquee(),
+    buildIntroCards(),
     buildAbout(),
     buildProducts(),
     buildServices(),
