@@ -1062,19 +1062,19 @@ function injectStyles() {
       opacity: 1;
     }
     .modal-box {
-      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
-      border: 2px solid var(--accent);
+      background: linear-gradient(180deg, rgba(30, 55, 75, 0.92), rgba(25, 50, 70, 0.90));
+      border: 1px solid rgba(0, 208, 132, 0.12);
       border-radius: 28px;
       padding: 2rem;
       backdrop-filter: blur(12px);
-      box-shadow: 0 32px 64px rgba(0,0,0,0.08);
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.25);
     }
     .modal-title {
       margin: 0 0 1rem;
       font-size: 1.6rem;
       letter-spacing: -0.03em;
       text-transform: uppercase;
-      color: var(--text);
+      color: #b8d8e8;
     }
     .modal-close {
       position: absolute;
@@ -1248,9 +1248,9 @@ function injectStyles() {
       gap: 1rem;
     }
     .about-icon-card, .stat-card, .service-card, .testimonial-card, .gallery-item, .faq-item, .contact-item, .contact-form, .map-frame, .why-visual, .why-item, .counter-item {
-      border: 1px solid rgba(255,255,255,0.08);
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
-      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 208, 132, 0.12);
+      background: linear-gradient(180deg, rgba(25, 50, 70, 0.88), rgba(20, 42, 60, 0.85));
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
       backdrop-filter: blur(12px);
     }
     .about-icon-card {
@@ -1260,7 +1260,7 @@ function injectStyles() {
       place-items: center;
       gap: 0.7rem;
       text-align: center;
-      color: #d7eee5;
+      color: #b8d8e8;
     }
     .about-icon-card svg { width: 28px; height: 28px; color: var(--accent); }
     .about-img-frame, .why-visual, .contact-form, .map-frame { border-radius: var(--radius); padding: 1.25rem; }
@@ -1551,9 +1551,9 @@ function injectStyles() {
     .form-label { color: var(--text); font-weight: 700; font-size: 0.92rem; }
     .form-input, .form-select, .form-textarea {
       width: 100%;
-      border: 2px solid var(--line);
-      background: rgba(255,255,255,0.8);
-      color: var(--text);
+      border: 1px solid rgba(0, 208, 132, 0.12);
+      background: rgba(15, 30, 45, 0.6);
+      color: #b8d8e8;
       border-radius: 16px;
       padding: 0.95rem 1rem;
       outline: none;
@@ -1561,7 +1561,7 @@ function injectStyles() {
     }
     .form-input:focus, .form-select:focus, .form-textarea:focus {
       border-color: var(--accent);
-      background: rgba(255,255,255,0.95);
+      background: rgba(15, 30, 45, 0.8);
       box-shadow: 0 0 24px rgba(0, 208, 132, 0.2);
     }
     .form-textarea { min-height: 140px; resize: vertical; }
@@ -1570,7 +1570,7 @@ function injectStyles() {
       padding: 0.9rem 1rem;
       border-radius: 16px;
       background: rgba(0, 208, 132, 0.12);
-      border: 2px solid var(--accent);
+      border: 1px solid var(--accent);
       color: var(--accent);
       font-weight: 700;
     }
@@ -1589,9 +1589,9 @@ function injectStyles() {
       gap: 1rem;
     }
     .admin-card, .feedback-card, .data-card {
-      border: 2px solid rgba(0, 208, 132, 0.15);
-      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.90));
-      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 208, 132, 0.12);
+      background: linear-gradient(180deg, rgba(25, 50, 70, 0.88), rgba(20, 42, 60, 0.85));
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
       backdrop-filter: blur(12px);
       border-radius: 24px;
       padding: 1.2rem;
@@ -1601,7 +1601,7 @@ function injectStyles() {
       text-transform: uppercase;
       letter-spacing: 0.12em;
       font-size: 0.8rem;
-      color: var(--muted-2);
+      color: #7eb5d4;
       font-weight: 800;
     }
     .admin-mini-grid {
