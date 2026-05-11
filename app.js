@@ -816,8 +816,8 @@ function injectStyles() {
     }
     .shutter-wrap {
       position: relative;
-      width: min(88vw, 760px);
-      height: 320px;
+      width: min(92vw, 980px);
+      height: 420px;
       display: grid;
       place-items: center;
       margin-bottom: 1.2rem;
@@ -853,18 +853,18 @@ function injectStyles() {
       left: 50%;
       transform: translateX(-50%);
       transform-origin: top center;
-      width: min(86vw, 640px);
+      width: min(90vw, 860px);
       display: grid;
-      gap: 8px;
+      gap: 12px;
       background: rgba(255,255,255,0.02);
-      padding: 18px;
-      border-radius: 28px;
+      padding: 22px;
+      border-radius: 34px;
       border: 1px solid rgba(255,255,255,0.06);
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
     }
     .shutter-slat {
-      height: 16px;
+      height: 20px;
       border-radius: 999px;
       background: linear-gradient(90deg, rgba(61,220,132,0.18), rgba(255,255,255,0.12), rgba(61,220,132,0.16));
       border: 1px solid rgba(255,255,255,0.07);
@@ -3054,16 +3054,16 @@ function runLoader(onComplete) {
     if (window.gsap) {
       const slats = panel.querySelectorAll(".shutter-slat");
       const timeline = gsap.timeline({ defaults: { ease: "power2.inOut" } });
-      timeline.to(slats, { y: -18, opacity: 0, stagger: 0.035, duration: 0.45 }, 0);
-      timeline.to(panel, { y: "-245px", scaleY: 0.62, duration: 1.2 }, 0.08);
+      timeline.to(slats, { y: -24, opacity: 0, stagger: 0.045, duration: 0.55 }, 0);
+      timeline.to(panel, { y: "-305px", scaleY: 0.52, duration: 1.35 }, 0.08);
       timeline.to(logoBehind, { opacity: 1, y: 0, duration: 0.45 }, 0.82);
       timeline.add(() => clearInterval(sparkInterval), 0.82);
     } else {
-      panel.style.transform = "translateX(-50%) translateY(-245px) scaleY(0.62)";
-      panel.style.transition = "transform 1.2s ease";
+      panel.style.transform = "translateX(-50%) translateY(-305px) scaleY(0.52)";
+      panel.style.transition = "transform 1.35s ease";
       panel.querySelectorAll(".shutter-slat").forEach((slat, index) => {
-        slat.style.transition = `transform 0.45s ease ${index * 0.035}s, opacity 0.45s ease ${index * 0.035}s`;
-        slat.style.transform = "translateY(-18px)";
+        slat.style.transition = `transform 0.55s ease ${index * 0.045}s, opacity 0.55s ease ${index * 0.045}s`;
+        slat.style.transform = "translateY(-24px)";
         slat.style.opacity = "0";
       });
       clearInterval(sparkInterval);
