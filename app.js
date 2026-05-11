@@ -1819,6 +1819,47 @@ function buildAdminPortal() {
     statsFormMsg
   );
 
+  // Admin User Management
+  const adminNewPass = el("input", { type: "password", class: "form-input", id: "adminNewPassword", placeholder: "New password", required: "" });
+  const adminConfirmPass = el("input", { type: "password", class: "form-input", id: "adminConfirmPassword", placeholder: "Confirm password", required: "" });
+  const adminPassMsg = el("div", { class: "form-success", id: "adminPasswordMsg" }, "Password updated.");
+  const adminPassForm = el("form", { id: "adminPasswordForm" },
+    el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminNewPassword" }, "New Password"), adminNewPass),
+    el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminConfirmPassword" }, "Confirm Password"), adminConfirmPass),
+    el("button", { type: "submit", class: "btn-primary", style: { width: "100%", justifyContent: "center" } }, svg(ICONS.check), "Change Password"),
+    adminPassMsg
+  );
+
+  adminPassForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const newPass = adminNewPass.value.trim();
+    const confirmPass = adminConfirmPass.value.trim();
+    if (!newPass || newPass.length < 4) {
+      adminPassMsg.textContent = "Password must be at least 4 characters.";
+      adminPassMsg.style.display = "block";
+      return;
+    }
+    if (newPass !== confirmPass) {
+      adminPassMsg.textContent = "Passwords do not match.";
+      adminPassMsg.style.display = "block";
+      return;
+    }
+    // Update first admin's password
+    if (Array.isArray(State.admins) && State.admins.length > 0) {
+      State.admins[0].pass = newPass;
+      persistAdminsData();
+      adminPassMsg.textContent = "Password updated successfully.";
+      adminPassMsg.style.display = "block";
+      adminPassForm.reset();
+      setTimeout(() => { adminPassMsg.style.display = "none"; }, 2200);
+    }
+  });
+
+  const adminCurrentUser = el("div", { class: "mini-item" },
+    el("strong", {}, Array.isArray(State.admins) && State.admins.length > 0 ? (State.admins[0].user || "admin") : "admin"),
+    el("span", {}, "Current Administrator")
+  );
+
   projectForm.addEventListener("submit", (event) => {
     event.preventDefault();
     State.dashboard.projects.push({
@@ -1914,7 +1955,8 @@ function buildAdminPortal() {
         el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Add Project"), projectForm),
         el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Add Client"), clientForm),
         el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Add Gallery Item"), galleryForm),
-        el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Update Experience"), statsForm)
+        el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Update Experience"), statsForm),
+        el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Admin Settings"), adminPassForm, el("div", { class: "admin-mini-grid", style: { marginTop: "1rem" } }, adminCurrentUser))
       ),
       el("div", { class: "admin-stack" },
         el("div", { class: "admin-card" }, el("h3", { class: "contact-form-title" }, "Live Summary"), summary),
