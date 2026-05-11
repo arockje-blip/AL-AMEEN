@@ -233,6 +233,17 @@ async function syncPublicCloudData() {
   refreshDashboardView();
 }
 
+async function pushDefaultAdminToCloud() {
+  if (!cloudDb) return;
+  const defaultAdmin = { user: "admin", pass: "admin123", createdAt: new Date().toISOString() };
+  try {
+    await setCollectionDoc(FIREBASE_COLLECTIONS.admins, "admin", defaultAdmin);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function syncAdminCloudData() {
   if (!cloudDb) return;
   const [clientsDocs, adminsDocs] = await Promise.all([
@@ -241,7 +252,13 @@ async function syncAdminCloudData() {
   ]);
 
   if (clientsDocs.length) State.customers = clientsDocs.map((doc) => mapClientDoc(doc, doc.id));
-  if (adminsDocs.length) State.admins = adminsDocs.map((doc) => ({ user: doc.user || "admin", pass: doc.pass || "admin123" }));
+  if (adminsDocs.length) {
+    State.admins = adminsDocs.map((doc) => ({ user: doc.user || "admin", pass: doc.pass || "admin123" }));
+  } else {
+    // No admins in Firestore, push default admin
+    await pushDefaultAdminToCloud();
+    State.admins = [{ user: "admin", pass: "admin123" }];
+  }
 
   persistCustomersData();
   persistAdminsData();
@@ -2905,6 +2922,8 @@ function showAdminLogin(onSuccess) {
   } else {
     State.admins = [adminCreds];
     persistAdminsData();
+    // Push default admin to cloud if not already there
+    void pushDefaultAdminToCloud();
   }
 
   const attemptLogin = () => {
