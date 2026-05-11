@@ -953,12 +953,12 @@ function injectStyles() {
       padding: 0;
     }
     .nav-links a {
-      color: var(--muted);
+      color: #f4fbff;
       font-weight: 600;
       font-size: 0.96rem;
       transition: color 0.2s ease;
     }
-    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover { color: var(--accent); }
     .nav-cta, .btn-primary, .btn-outline, .btn-whatsapp, .modal-close, .footer-social-btn, .float-whatsapp, .float-call {
       border: 0;
       outline: 0;
@@ -1041,10 +1041,12 @@ function injectStyles() {
     .mobile-menu a {
       padding: 1rem 1.1rem;
       border-radius: 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(10, 20, 30, 0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #f4fbff;
       font-weight: 700;
     }
+    .mobile-menu a:hover { color: var(--accent); }
 
     .modal-overlay {
       position: fixed;
@@ -1298,6 +1300,9 @@ function injectStyles() {
       cursor: pointer;
       overflow: hidden;
       transition: transform 0.25s ease, border-color 0.25s ease;
+      border: 1px solid rgba(0, 208, 132, 0.12);
+      background: linear-gradient(180deg, rgba(25, 50, 70, 0.88), rgba(20, 42, 60, 0.85));
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
     }
     .product-card:hover { transform: translateY(-4px); border-color: rgba(61,220,132,0.22); }
     .product-card::after {
@@ -1314,9 +1319,9 @@ function injectStyles() {
       width: 52px;
       height: 52px;
       border-radius: 18px;
-      background: rgba(61,220,132,0.11);
-      color: var(--accent);
-      border: 1px solid rgba(61,220,132,0.16);
+      background: rgba(0,208,132,0.11);
+      color: #bdf8d4;
+      border: 1px solid rgba(0,208,132,0.16);
     }
     .product-name, .service-name, .why-item-title, .author-name, .contact-label, .footer-col-title, .modal-title {
       font-weight: 800;
@@ -1332,9 +1337,9 @@ function injectStyles() {
       width: fit-content;
       padding: 0.4rem 0.7rem;
       border-radius: 999px;
-      background: rgba(255,255,255,0.05);
+      background: rgba(10, 20, 30, 0.65);
       border: 1px solid rgba(255,255,255,0.08);
-      color: #dbe9e3;
+      color: #f4fbff;
       font-size: 0.74rem;
       font-weight: 700;
       letter-spacing: 0.08em;
