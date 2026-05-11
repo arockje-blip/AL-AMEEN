@@ -2098,43 +2098,30 @@ function closeMobileMenu() {
 }
 
 function buildHero() {
-  // Lock-opening intro: large lock graphic + headline + CTA
-  const badge = el("div", { class: "hero-badge", style: { animation: "bounce 2s infinite" } }, "🔐 Secure & Automated");
+  const badge = el("div", { class: "hero-badge", style: { animation: "bounce 2s infinite, glow-pulse 3s infinite" } }, "🚀 Salem's #1 Automation Expert");
+  const titleLines = ["ROLL WITH", "THE FUTURE", "OF SHUTTERS"].map((word, index) => {
+    const span = el("span", { class: "hero-title-line", style: { animation: `slideUp 0.8s ease-out ${index * 0.2}s both` } });
+    if (index === 1) span.innerHTML = `<span class="accent" style="background: linear-gradient(135deg, #00d084, #0066ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">${word}</span>`;
+    else span.textContent = word;
+    return span;
+  });
+  const title = el("h1", { class: "hero-title" }, ...titleLines);
+  const sub = el("p", { class: "hero-sub", style: { animation: "fadeIn 1s ease-out 0.6s both" } }, "Industry-leading automation solutions tailored for your business. Lightning-fast installation. Lifetime support.");
 
-  const lockSVG = `
-    <svg viewBox="0 0 120 120" width="160" height="160" aria-hidden="true">
-      <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="26" y="44" width="68" height="54" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" />
-        <path id="shackle" d="M40 44c0-15 6-26 20-26s20 11 20 26" stroke="#ffffff" fill="none" transform="translate(0,0)" />
-      </g>
-      <circle cx="60" cy="71" r="6" fill="#00d084" />
-    </svg>
-  `;
+  const btnContact = el("a", { href: "#contact", class: "btn-primary", style: { animation: "slideInLeft 0.8s ease-out 1s both" } }, svg(ICONS.phone), "Get Started Now");
+  const btnProducts = el("a", { href: "#products", class: "btn-outline", style: { animation: "slideInLeft 0.8s ease-out 1.1s both" } }, svg(ICONS.shutter), "Explore Catalog");
+  const btnWA = el("a", { href: BRAND.whatsapp, target: "_blank", rel: "noreferrer", class: "btn-whatsapp", style: { animation: "slideInLeft 0.8s ease-out 1.2s both" } }, svg(ICONS.whatsapp), "Chat Now");
+  const btns = el("div", { class: "hero-btns" }, btnContact, btnProducts, btnWA);
 
-  const lockGraphic = el("div", { class: "lock-graphic" });
-  lockGraphic.innerHTML = lockSVG;
-
-  const lockWrap = el("div", { class: "lock-wrap" },
-    lockGraphic,
-    el("div", { class: "lock-caption" },
-      el("h1", { class: "hero-title" },
-        el("span", { class: "hero-title-line", style: { animation: "slideUp 0.8s ease-out 0s both" } }, "WE OPEN THE LOCK"),
-        el("span", { class: "hero-title-line", style: { animation: "slideUp 0.8s ease-out 0.2s both" } }, "ON YOUR BUSINESS SECURITY")
-      ),
-      el("p", { class: "hero-sub", style: { animation: "fadeIn 1s ease-out 0.6s both" } }, "Secure, automate and protect — professional rolling shutters with smart controls and lifetime support.")
-    )
-  );
-
-  const btnContact = el("a", { href: "#contact", class: "btn-primary", style: { animation: "slideInLeft 0.8s ease-out 0.9s both" } }, svg(ICONS.phone), "Get A Secure Quote");
-  const btnWA = el("a", { href: BRAND.whatsapp, target: "_blank", rel: "noreferrer", class: "btn-whatsapp", style: { animation: "slideInLeft 0.8s ease-out 1.1s both" } }, svg(ICONS.whatsapp), "Chat Now");
-  const btns = el("div", { class: "hero-btns" }, btnContact, btnWA);
-
-  const scrollHint = el("div", { class: "hero-scroll" }, el("span", {}, "Scroll to explore"), el("div", { class: "scroll-line" }));
+  const scrollHint = el("div", { class: "hero-scroll" }, el("span", {}, "Discover More"), el("div", { class: "scroll-line" }));
+  const canvas = el("canvas", { class: "particles-canvas", id: "particlesCanvas" });
 
   return el("section", { id: "hero" },
-    el("div", { class: "hero-bg", style: { background: "linear-gradient(135deg, rgba(0, 208, 132, 0.06) 0%, rgba(0, 102, 255, 0.06) 100%)" } }),
+    el("div", { class: "hero-bg", style: { background: "linear-gradient(135deg, rgba(0, 208, 132, 0.1) 0%, rgba(0, 102, 255, 0.1) 100%)" } }),
     el("div", { class: "hero-grid" }),
-    el("div", { class: "hero-content" }, badge, lockWrap, btns, scrollHint)
+    canvas,
+    el("div", { class: "hero-content" }, badge, title, sub, btns),
+    scrollHint
   );
 }
 
