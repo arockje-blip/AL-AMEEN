@@ -294,6 +294,17 @@ async function writeSettingsToCloud() {
   });
 }
 
+async function updateProjectToCloud(project) {
+  if (!cloudDb) return;
+  await addCollectionDoc(FIREBASE_COLLECTIONS.projects, { ...project, createdAt: new Date().toISOString() });
+  await writeStatsToCloud();
+}
+
+async function updateGalleryToCloud(item) {
+  if (!cloudDb) return;
+  await addCollectionDoc(FIREBASE_COLLECTIONS.gallery, { ...item, createdAt: new Date().toISOString() });
+}
+
 function createDefaultDashboard() {
   return {
     stats: {
@@ -389,6 +400,12 @@ const State = {
   admins: loadAdminsData(),
 };
 
+const EditState = {
+  projectIndex: null,
+  clientId: null,
+  galleryIndex: null,
+};
+
 function persistDashboardData() {
   safeWriteJSON(STORAGE_KEYS.dashboard, State.dashboard);
 }
@@ -430,6 +447,101 @@ function refreshStatNodes() {
   });
 }
 
+function editProject(index) {
+  EditState.projectIndex = index;
+  const project = State.dashboard.projects[index];
+  document.getElementById("adminProjectName").value = project.title;
+  document.getElementById("adminProjectClient").value = project.client;
+  document.getElementById("adminProjectLocation").value = project.location;
+  document.getElementById("adminProjectStatus").value = project.status;
+  document.getElementById("adminProjectNote").value = project.note;
+  document.getElementById("adminProjectBtn").textContent = "Update Project";
+  document.getElementById("adminProjectBtn").style.backgroundColor = "#f4c94a";
+  document.getElementById("adminProjectClearBtn").style.display = "inline-block";
+  document.getElementById("adminProjectForm").scrollIntoView({ behavior: "smooth" });
+}
+
+function editClient(customerId) {
+  EditState.clientId = customerId;
+  const client = State.customers.find((c) => c.customerId === customerId);
+  if (!client) return;
+  document.getElementById("adminClientId").value = client.customerId;
+  document.getElementById("adminClientName").value = client.name;
+  document.getElementById("adminClientPhone").value = client.phone;
+  document.getElementById("adminClientCategory").value = client.category;
+  document.getElementById("adminClientBtn").textContent = "Update Client";
+  document.getElementById("adminClientBtn").style.backgroundColor = "#f4c94a";
+  document.getElementById("adminClientClearBtn").style.display = "inline-block";
+  document.getElementById("adminClientForm").scrollIntoView({ behavior: "smooth" });
+}
+
+function editGallery(index) {
+  EditState.galleryIndex = index;
+  const item = State.dashboard.gallery[index];
+  document.getElementById("adminGalleryTitle").value = item.title;
+  document.getElementById("adminGalleryNote").value = item.note;
+  document.getElementById("adminGalleryYear").value = item.year;
+  document.getElementById("adminGalleryBtn").textContent = "Update Gallery Item";
+  document.getElementById("adminGalleryBtn").style.backgroundColor = "#f4c94a";
+  document.getElementById("adminGalleryClearBtn").style.display = "inline-block";
+  document.getElementById("adminGalleryForm").scrollIntoView({ behavior: "smooth" });
+}
+
+function deleteProject(index) {
+  if (confirm("Delete this project?")) {
+    State.dashboard.projects.splice(index, 1);
+    State.dashboard.stats.projects = Math.max(0, (State.dashboard.stats.projects ?? 1) - 1);
+    persistDashboardData();
+    void writeProjectToCloud({ _deleted: true });
+    refreshDashboardView();
+  }
+}
+
+function deleteClient(customerId) {
+  if (confirm("Delete this client?")) {
+    const idx = State.customers.findIndex((c) => c.customerId === customerId);
+    if (idx >= 0) State.customers.splice(idx, 1);
+    State.dashboard.stats.clients = Math.max(0, (State.dashboard.stats.clients ?? 1) - 1);
+    persistCustomersData();
+    void writeClientToCloud({ customerId, _deleted: true });
+    refreshDashboardView();
+  }
+}
+
+function deleteGallery(index) {
+  if (confirm("Delete this gallery item?")) {
+    State.dashboard.gallery.splice(index, 1);
+    persistDashboardData();
+    void updateGalleryToCloud({ _deleted: true });
+    refreshDashboardView();
+  }
+}
+
+function clearProjectEdit() {
+  EditState.projectIndex = null;
+  document.getElementById("adminProjectForm").reset();
+  document.getElementById("adminProjectStatus").value = "Planned";
+  document.getElementById("adminProjectBtn").textContent = "Add Project";
+  document.getElementById("adminProjectBtn").style.backgroundColor = "";
+  document.getElementById("adminProjectClearBtn").style.display = "none";
+}
+
+function clearClientEdit() {
+  EditState.clientId = null;
+  document.getElementById("adminClientForm").reset();
+  document.getElementById("adminClientBtn").textContent = "Add Client";
+  document.getElementById("adminClientBtn").style.backgroundColor = "";
+  document.getElementById("adminClientClearBtn").style.display = "none";
+}
+
+function clearGalleryEdit() {
+  EditState.galleryIndex = null;
+  document.getElementById("adminGalleryForm").reset();
+  document.getElementById("adminGalleryBtn").textContent = "Add Gallery Item";
+  document.getElementById("adminGalleryBtn").style.backgroundColor = "";
+  document.getElementById("adminGalleryClearBtn").style.display = "none";
+}
+
 function renderAdminLists() {
   const projectsList = document.getElementById("adminProjectsList");
   const clientsList = document.getElementById("adminClientsList");
@@ -438,14 +550,18 @@ function renderAdminLists() {
     if (!State.dashboard.projects.length) renderEmptyState(projectsList, "No admin projects added yet.");
     else {
       projectsList.innerHTML = "";
-      State.dashboard.projects.slice().reverse().forEach((project) => {
-        projectsList.append(
-          el("div", { class: "mini-item" },
-            el("strong", {}, formatListValue(project.title)),
-            el("span", {}, `${formatListValue(project.client)} · ${formatListValue(project.location)}`),
-            el("span", { class: "mini-note" }, `${formatListValue(project.status)} · ${formatListValue(project.note)}`)
+      State.dashboard.projects.slice().reverse().forEach((project, idx) => {
+        const actualIdx = State.dashboard.projects.length - 1 - idx;
+        const itemDiv = el("div", { class: "mini-item" },
+          el("strong", {}, formatListValue(project.title)),
+          el("span", {}, `${formatListValue(project.client)} · ${formatListValue(project.location)}`),
+          el("span", { class: "mini-note" }, `${formatListValue(project.status)} · ${formatListValue(project.note)}`),
+          el("div", { style: { display: "flex", gap: "0.5rem", marginTop: "0.5rem" } },
+            el("button", { class: "btn-link", style: { fontSize: "0.75rem", padding: "0.25rem 0.5rem" }, onclick: () => editProject(actualIdx) }, "Edit"),
+            el("button", { class: "btn-link", style: { fontSize: "0.75rem", padding: "0.25rem 0.5rem", color: "#ff6b6b" }, onclick: () => deleteProject(actualIdx) }, "Delete")
           )
         );
+        projectsList.append(itemDiv);
       });
     }
   }
@@ -453,13 +569,16 @@ function renderAdminLists() {
     if (!State.customers.length) renderEmptyState(clientsList, "No customers stored yet.");
     else {
       clientsList.innerHTML = "";
-      State.customers.slice().reverse().forEach((client) => {
-        clientsList.append(
-          el("div", { class: "mini-item" },
-            el("strong", {}, `${formatListValue(client.name)} (${formatListValue(client.customerId)})`),
-            el("span", {}, `${formatListValue(client.phone)} · ${formatListValue(client.category)}`)
+      State.customers.forEach((client) => {
+        const itemDiv = el("div", { class: "mini-item" },
+          el("strong", {}, `${formatListValue(client.name)} (${formatListValue(client.customerId)})`),
+          el("span", {}, `${formatListValue(client.phone)} · ${formatListValue(client.category)}`),
+          el("div", { style: { display: "flex", gap: "0.5rem", marginTop: "0.5rem" } },
+            el("button", { class: "btn-link", style: { fontSize: "0.75rem", padding: "0.25rem 0.5rem" }, onclick: () => editClient(client.customerId) }, "Edit"),
+            el("button", { class: "btn-link", style: { fontSize: "0.75rem", padding: "0.25rem 0.5rem", color: "#ff6b6b" }, onclick: () => deleteClient(client.customerId) }, "Delete")
           )
         );
+        clientsList.append(itemDiv);
       });
     }
   }
@@ -467,14 +586,18 @@ function renderAdminLists() {
     if (!State.dashboard.gallery.length) renderEmptyState(galleryList, "No gallery entries added yet.");
     else {
       galleryList.innerHTML = "";
-      State.dashboard.gallery.slice().reverse().forEach((item) => {
-        galleryList.append(
-          el("div", { class: "mini-item" },
-            el("strong", {}, formatListValue(item.title)),
-            el("span", {}, formatListValue(item.note)),
-            el("span", { class: "mini-note" }, formatListValue(item.year))
+      State.dashboard.gallery.slice().reverse().forEach((item, idx) => {
+        const actualIdx = State.dashboard.gallery.length - 1 - idx;
+        const itemDiv = el("div", { class: "mini-item" },
+          el("strong", {}, formatListValue(item.title)),
+          el("span", {}, formatListValue(item.note)),
+          el("span", { class: "mini-note" }, formatListValue(item.year)),
+          el("div", { style: { display: "flex", gap: "0.5rem", marginTop: "0.5rem" } },
+            el("button", { class: "btn-link", style: { fontSize: "0.75rem", padding: "0.25rem 0.5rem" }, onclick: () => editGallery(actualIdx) }, "Edit"),
+            el("button", { class: "btn-link", style: { fontSize: "0.75rem", padding: "0.25rem 0.5rem", color: "#ff6b6b" }, onclick: () => deleteGallery(actualIdx) }, "Delete")
           )
         );
+        galleryList.append(itemDiv);
       });
     }
   }
@@ -812,6 +935,27 @@ function injectStyles() {
       color: #04120b;
       padding: 0.9rem 1.25rem;
       box-shadow: 0 16px 34px rgba(45, 189, 132, 0.2);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.12);
+      color: var(--text);
+      padding: 0.9rem 1.25rem;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 12px;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.18);
+      transform: translateY(-2px);
+    }
+    .btn-link {
+      background: none;
+      border: none;
+      color: #3ddc84;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .btn-link:hover {
+      color: #2ddc84;
     }
     .hamburger { display: none; width: 46px; height: 46px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); align-items: center; justify-content: center; gap: 4px; flex-direction: column; }
     .hamburger span { width: 18px; height: 2px; border-radius: 999px; background: var(--text); transition: transform 0.2s ease, opacity 0.2s ease; }
@@ -2021,7 +2165,10 @@ function buildAdminPortal() {
       el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminProjectStatus" }, "Status"), projectStatus)
     ),
     el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminProjectNote" }, "Note"), projectNote),
-    el("button", { type: "submit", class: "btn-primary", style: { width: "100%", justifyContent: "center" } }, svg(ICONS.plus), "Add Project"),
+    el("div", { style: { display: "flex", gap: "0.5rem" } },
+      el("button", { type: "submit", class: "btn-primary", id: "adminProjectBtn", style: { flex: "1", justifyContent: "center" } }, svg(ICONS.plus), "Add Project"),
+      el("button", { type: "button", class: "btn-secondary", id: "adminProjectClearBtn", style: { display: "none", padding: "0.75rem", justifyContent: "center" }, onclick: () => clearProjectEdit() }, "Clear")
+    ),
     projectFormMsg
   );
 
@@ -2039,7 +2186,10 @@ function buildAdminPortal() {
       el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminClientPhone" }, "Phone"), clientPhone),
       el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminClientCategory" }, "Type"), clientCategory)
     ),
-    el("button", { type: "submit", class: "btn-primary", style: { width: "100%", justifyContent: "center" } }, svg(ICONS.person), "Add Client"),
+    el("div", { style: { display: "flex", gap: "0.5rem" } },
+      el("button", { type: "submit", class: "btn-primary", id: "adminClientBtn", style: { flex: "1", justifyContent: "center" } }, svg(ICONS.person), "Add Client"),
+      el("button", { type: "button", class: "btn-secondary", id: "adminClientClearBtn", style: { display: "none", padding: "0.75rem", justifyContent: "center" }, onclick: () => clearClientEdit() }, "Clear")
+    ),
     clientFormMsg
   );
 
@@ -2051,7 +2201,10 @@ function buildAdminPortal() {
     el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminGalleryTitle" }, "Title"), galleryTitle),
     el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminGalleryNote" }, "Note"), galleryNote),
     el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminGalleryYear" }, "Year / Tag"), galleryYear),
-    el("button", { type: "submit", class: "btn-primary", style: { width: "100%", justifyContent: "center" } }, svg(ICONS.image), "Add Gallery Item"),
+    el("div", { style: { display: "flex", gap: "0.5rem" } },
+      el("button", { type: "submit", class: "btn-primary", id: "adminGalleryBtn", style: { flex: "1", justifyContent: "center" } }, svg(ICONS.image), "Add Gallery Item"),
+      el("button", { type: "button", class: "btn-secondary", id: "adminGalleryClearBtn", style: { display: "none", padding: "0.75rem", justifyContent: "center" }, onclick: () => clearGalleryEdit() }, "Clear")
+    ),
     galleryFormMsg
   );
 
@@ -2114,10 +2267,21 @@ function buildAdminPortal() {
       status: projectStatus.value,
       note: projectNote.value.trim(),
     };
-    State.dashboard.projects.push(payload);
-    State.dashboard.stats.projects = (State.dashboard.stats.projects ?? 0) + 1;
+    if (EditState.projectIndex !== null) {
+      // Update existing project
+      State.dashboard.projects[EditState.projectIndex] = payload;
+      projectFormMsg.textContent = "Project updated.";
+      void updateProjectToCloud(payload);
+      clearProjectEdit();
+    } else {
+      // Add new project
+      State.dashboard.projects.push(payload);
+      State.dashboard.stats.projects = (State.dashboard.stats.projects ?? 0) + 1;
+      void writeProjectToCloud(payload);
+      projectFormMsg.textContent = "Project saved.";
+      projectStatus.value = "Planned";
+    }
     persistDashboardData();
-    void writeProjectToCloud(payload);
     refreshDashboardView();
     projectFormMsg.style.display = "block";
     projectForm.reset();
@@ -2135,13 +2299,26 @@ function buildAdminPortal() {
       phone: clientPhone.value.trim(),
       category: clientCategory.value.trim(),
     };
-    if (existingIndex >= 0) State.customers[existingIndex] = payload;
-    else {
+    if (EditState.clientId !== null) {
+      // Update existing client
+      const idx = State.customers.findIndex((c) => c.customerId === EditState.clientId);
+      if (idx >= 0) State.customers[idx] = payload;
+      clientFormMsg.textContent = "Client updated.";
+      void writeClientToCloud(payload);
+      clearClientEdit();
+    } else if (existingIndex >= 0) {
+      // Update by customer ID
+      State.customers[existingIndex] = payload;
+      clientFormMsg.textContent = "Client updated.";
+      void writeClientToCloud(payload);
+    } else {
+      // Add new client
       State.customers.push(payload);
       State.dashboard.stats.clients = (State.dashboard.stats.clients ?? 0) + 1;
+      clientFormMsg.textContent = "Client saved.";
+      void writeClientToCloud(payload);
     }
     persistCustomersData();
-    void writeClientToCloud(payload);
     refreshDashboardView();
     clientFormMsg.style.display = "block";
     clientForm.reset();
@@ -2155,9 +2332,19 @@ function buildAdminPortal() {
       note: galleryNote.value.trim(),
       year: galleryYear.value.trim(),
     };
-    State.dashboard.gallery.push(payload);
+    if (EditState.galleryIndex !== null) {
+      // Update existing gallery item
+      State.dashboard.gallery[EditState.galleryIndex] = payload;
+      galleryFormMsg.textContent = "Gallery item updated.";
+      void updateGalleryToCloud(payload);
+      clearGalleryEdit();
+    } else {
+      // Add new gallery item
+      State.dashboard.gallery.push(payload);
+      galleryFormMsg.textContent = "Gallery item saved.";
+      void writeGalleryToCloud(payload);
+    }
     persistDashboardData();
-    void writeGalleryToCloud(payload);
     refreshDashboardView();
     galleryFormMsg.style.display = "block";
     galleryForm.reset();
