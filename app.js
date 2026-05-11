@@ -718,18 +718,18 @@ function injectStyles() {
   style.id = "siteStyles";
   style.textContent = `
     :root {
-      --bg: #071118;
-      --bg2: #0b1b22;
-      --panel: rgba(9, 22, 28, 0.86);
-      --panel-strong: rgba(8, 18, 24, 0.96);
-      --line: rgba(255, 255, 255, 0.10);
-      --text: #e7f0ec;
-      --muted: rgba(231, 240, 236, 0.72);
-      --muted-2: rgba(231, 240, 236, 0.56);
-      --accent: #3ddc84;
-      --accent-2: #f4c94a;
-      --accent-3: #2ea7ff;
-      --shadow: 0 22px 65px rgba(0, 0, 0, 0.35);
+      --bg: #f5f7fa;
+      --bg2: #eff2f7;
+      --panel: rgba(255, 255, 255, 0.95);
+      --panel-strong: rgba(245, 247, 250, 0.98);
+      --line: rgba(0, 0, 0, 0.08);
+      --text: #1a2332;
+      --muted: rgba(26, 35, 50, 0.72);
+      --muted-2: rgba(26, 35, 50, 0.56);
+      --accent: #00d084;
+      --accent-2: #ff9500;
+      --accent-3: #0066ff;
+      --shadow: 0 22px 65px rgba(0, 0, 0, 0.08);
       --radius: 24px;
       --radius-sm: 16px;
       --max: 1200px;
@@ -740,9 +740,9 @@ function injectStyles() {
     body {
       margin: 0;
       background:
-        radial-gradient(circle at top left, rgba(61, 220, 132, 0.14), transparent 30%),
-        radial-gradient(circle at top right, rgba(244, 201, 74, 0.10), transparent 24%),
-        linear-gradient(180deg, #050b10 0%, var(--bg) 46%, #041016 100%);
+        radial-gradient(circle at top left, rgba(0, 208, 132, 0.08), transparent 30%),
+        radial-gradient(circle at top right, rgba(255, 149, 0, 0.06), transparent 24%),
+        linear-gradient(180deg, #ffffff 0%, var(--bg) 46%, #f0f3f9 100%);
       color: var(--text);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       overflow-x: hidden;
@@ -752,10 +752,10 @@ function injectStyles() {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
       background-size: 42px 42px;
-      opacity: 0.22;
-      mask-image: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.65));
+      opacity: 0.5;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
     }
     a { color: inherit; text-decoration: none; }
     img, svg, canvas { display: block; }
@@ -1958,26 +1958,26 @@ function closeMobileMenu() {
 }
 
 function buildHero() {
-  const badge = el("div", { class: "hero-badge" }, "Salem, Tamil Nadu - Est. 2010");
-  const titleLines = ["AL AMEEN", "ROLLING", "SHUTTER"].map((word, index) => {
-    const span = el("span", { class: "hero-title-line" });
-    if (index === 1) span.innerHTML = `<span class="accent">${word}</span>`;
+  const badge = el("div", { class: "hero-badge", style: { animation: "bounce 2s infinite, glow-pulse 3s infinite" } }, "🚀 Salem's #1 Automation Expert");
+  const titleLines = ["ROLL WITH", "THE FUTURE", "OF SHUTTERS"].map((word, index) => {
+    const span = el("span", { class: "hero-title-line", style: { animation: `slideUp 0.8s ease-out ${index * 0.2}s both` } });
+    if (index === 1) span.innerHTML = `<span class="accent" style="background: linear-gradient(135deg, #00d084, #0066ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">${word}</span>`;
     else span.textContent = word;
     return span;
   });
   const title = el("h1", { class: "hero-title" }, ...titleLines);
-  const sub = el("p", { class: "hero-sub" }, BRAND.tagline);
+  const sub = el("p", { class: "hero-sub", style: { animation: "fadeIn 1s ease-out 0.6s both" } }, "Industry-leading automation solutions tailored for your business. Lightning-fast installation. Lifetime support.");
 
-  const btnContact = el("a", { href: "#contact", class: "btn-primary" }, svg(ICONS.phone), "Contact Now");
-  const btnProducts = el("a", { href: "#products", class: "btn-outline" }, svg(ICONS.shutter), "View Products");
-  const btnWA = el("a", { href: BRAND.whatsapp, target: "_blank", rel: "noreferrer", class: "btn-whatsapp" }, svg(ICONS.whatsapp), "WhatsApp Us");
+  const btnContact = el("a", { href: "#contact", class: "btn-primary", style: { animation: "slideInLeft 0.8s ease-out 1s both" } }, svg(ICONS.phone), "Get Started Now");
+  const btnProducts = el("a", { href: "#products", class: "btn-outline", style: { animation: "slideInLeft 0.8s ease-out 1.1s both" } }, svg(ICONS.shutter), "Explore Catalog");
+  const btnWA = el("a", { href: BRAND.whatsapp, target: "_blank", rel: "noreferrer", class: "btn-whatsapp", style: { animation: "slideInLeft 0.8s ease-out 1.2s both" } }, svg(ICONS.whatsapp), "Chat Now");
   const btns = el("div", { class: "hero-btns" }, btnContact, btnProducts, btnWA);
 
-  const scrollHint = el("div", { class: "hero-scroll" }, el("span", {}, "Scroll"), el("div", { class: "scroll-line" }));
+  const scrollHint = el("div", { class: "hero-scroll" }, el("span", {}, "Discover More"), el("div", { class: "scroll-line" }));
   const canvas = el("canvas", { class: "particles-canvas", id: "particlesCanvas" });
 
   return el("section", { id: "hero" },
-    el("div", { class: "hero-bg" }),
+    el("div", { class: "hero-bg", style: { background: "linear-gradient(135deg, rgba(0, 208, 132, 0.1) 0%, rgba(0, 102, 255, 0.1) 100%)" } }),
     el("div", { class: "hero-grid" }),
     canvas,
     el("div", { class: "hero-content" }, badge, title, sub, btns),
