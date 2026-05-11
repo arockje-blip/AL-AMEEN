@@ -2092,6 +2092,7 @@ function buildAdminPortal() {
     if (Array.isArray(State.admins) && State.admins.length > 0) {
       State.admins[0].pass = newPass;
       persistAdminsData();
+      void writeAdminToCloud(State.admins);
       adminPassMsg.textContent = "Password updated successfully.";
       adminPassMsg.style.display = "block";
       adminPassForm.reset();
@@ -2106,15 +2107,17 @@ function buildAdminPortal() {
 
   projectForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    State.dashboard.projects.push({
+    const payload = {
       title: projectName.value.trim(),
       client: projectClient.value.trim(),
       location: projectLocation.value.trim(),
       status: projectStatus.value,
       note: projectNote.value.trim(),
-    });
+    };
+    State.dashboard.projects.push(payload);
     State.dashboard.stats.projects = (State.dashboard.stats.projects ?? 0) + 1;
     persistDashboardData();
+    void writeProjectToCloud(payload);
     refreshDashboardView();
     projectFormMsg.style.display = "block";
     projectForm.reset();
@@ -2138,6 +2141,7 @@ function buildAdminPortal() {
       State.dashboard.stats.clients = (State.dashboard.stats.clients ?? 0) + 1;
     }
     persistCustomersData();
+    void writeClientToCloud(payload);
     refreshDashboardView();
     clientFormMsg.style.display = "block";
     clientForm.reset();
@@ -2146,12 +2150,14 @@ function buildAdminPortal() {
 
   galleryForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    State.dashboard.gallery.push({
+    const payload = {
       title: galleryTitle.value.trim(),
       note: galleryNote.value.trim(),
       year: galleryYear.value.trim(),
-    });
+    };
+    State.dashboard.gallery.push(payload);
     persistDashboardData();
+    void writeGalleryToCloud(payload);
     refreshDashboardView();
     galleryFormMsg.style.display = "block";
     galleryForm.reset();
@@ -2163,6 +2169,7 @@ function buildAdminPortal() {
     const experienceValue = Math.max(0, parseInt(experienceYears.value || "0", 10));
     State.dashboard.stats.experience = experienceValue;
     persistDashboardData();
+    void writeSettingsToCloud();
     refreshDashboardView();
     statsFormMsg.style.display = "block";
     setTimeout(() => { statsFormMsg.style.display = "none"; }, 2200);
@@ -2268,9 +2275,11 @@ function buildCustomerFeedback() {
     if (entry.customerId) {
       const exists = State.customers.some((c) => normalizeCustomerId(c.customerId || "") === entry.customerId);
       if (!exists) {
-        State.customers.push({ customerId: entry.customerId, name: entry.name, phone: entry.phone, category: entry.service || "" });
+        const customerPayload = { customerId: entry.customerId, name: entry.name, phone: entry.phone, category: entry.service || "" };
+        State.customers.push(customerPayload);
         State.dashboard.stats.clients = (State.dashboard.stats.clients ?? 0) + 1;
         persistCustomersData();
+        void writeClientToCloud(customerPayload);
         persistDashboardData();
       }
     }
@@ -2278,6 +2287,7 @@ function buildCustomerFeedback() {
     State.dashboard.stats.satisfaction = average;
     persistFeedbackData();
     persistDashboardData();
+    void writeFeedbackToCloud(entry);
     refreshDashboardView();
 
     feedbackMsg.textContent = "Feedback saved.";
@@ -2304,6 +2314,7 @@ function buildCustomerFeedback() {
     if (review.customerId && !State.reviews.some((r) => normalizeCustomerId(r.customerId || "") === review.customerId)) {
       State.reviews.push(review);
       persistReviewsData();
+      void writeReviewToCloud(review);
     }
   });
 
