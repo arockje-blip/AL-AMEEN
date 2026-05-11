@@ -40,11 +40,7 @@ const SERVICES = [
   { num: "06", title: "Spare Parts Supply", text: "All genuine spare parts - springs, gear boxes, bottom plates, gate wheels readily available." },
 ];
 
-const TESTIMONIALS = [
-  { initials:"RK", name:"Rajesh Kumar", role:"Showroom Owner, Salem", text:"Excellent workmanship. The automatic rolling shutter at my showroom works perfectly. Very professional team and timely delivery." },
-  { initials:"SM", name:"Suresh Murugan", role:"Retail Business Owner", text:"Got grill shutters for all 3 of my shops. Quality is outstanding and the price was very reasonable. Highly recommend!" },
-  { initials:"AP", name:"Anand Palanisamy", role:"Factory Manager, Kadayampatti", text:"The boom barrier at our factory gate has worked flawlessly for 2 years. Quick after-service whenever needed." },
-];
+// Testimonials now loaded from `State.reviews` (persisted storage). Static examples removed.
 
 const FAQS = [
   { q: "What types of rolling shutters do you manufacture?", a: "We manufacture standard rolling shutters, automatic motorised rolling shutters, grill shutters, aluminium shutters with wooden finish, glass shutters, and perforated shutters." },
@@ -91,6 +87,10 @@ const STORAGE_KEYS = {
   dashboard: "al_ameen_dashboard",
   feedback: "al_ameen_feedback",
 };
+
+STORAGE_KEYS.reviews = "al_ameen_reviews";
+STORAGE_KEYS.customers = "al_ameen_customers";
+STORAGE_KEYS.admins = "al_ameen_admins";
 
 function createDefaultDashboard() {
   return {
@@ -162,11 +162,29 @@ function loadFeedbackData() {
   return Array.isArray(stored) ? stored : [];
 }
 
+function loadReviewsData() {
+  const stored = safeReadJSON(STORAGE_KEYS.reviews, []);
+  return Array.isArray(stored) ? stored : [];
+}
+
+function loadCustomersData() {
+  const stored = safeReadJSON(STORAGE_KEYS.customers, []);
+  return Array.isArray(stored) ? stored : [];
+}
+
+function loadAdminsData() {
+  const stored = safeReadJSON(STORAGE_KEYS.admins, []);
+  return Array.isArray(stored) ? stored : [];
+}
+
 const State = {
   mobileMenuOpen: false,
   countersStarted: false,
   dashboard: loadDashboardData(),
   feedbacks: loadFeedbackData(),
+  reviews: loadReviewsData(),
+  customers: loadCustomersData(),
+  admins: loadAdminsData(),
 };
 
 function persistDashboardData() {
@@ -175,6 +193,18 @@ function persistDashboardData() {
 
 function persistFeedbackData() {
   safeWriteJSON(STORAGE_KEYS.feedback, State.feedbacks);
+}
+
+function persistReviewsData() {
+  safeWriteJSON(STORAGE_KEYS.reviews, State.reviews);
+}
+
+function persistCustomersData() {
+  safeWriteJSON(STORAGE_KEYS.customers, State.customers);
+}
+
+function persistAdminsData() {
+  safeWriteJSON(STORAGE_KEYS.admins, State.admins);
 }
 
 function normalizeCustomerId(value) {
@@ -218,10 +248,10 @@ function renderAdminLists() {
     }
   }
   if (clientsList) {
-    if (!State.dashboard.clients.length) renderEmptyState(clientsList, "No clients stored yet.");
+    if (!State.customers.length) renderEmptyState(clientsList, "No customers stored yet.");
     else {
       clientsList.innerHTML = "";
-      State.dashboard.clients.slice().reverse().forEach((client) => {
+      State.customers.slice().reverse().forEach((client) => {
         clientsList.append(
           el("div", { class: "mini-item" },
             el("strong", {}, `${formatListValue(client.name)} (${formatListValue(client.customerId)})`),
@@ -1439,26 +1469,33 @@ function buildNav() {
   const logo = el("a", { href: "#hero", class: "nav-logo", "aria-label": BRAND.name }, logoIcon, logoText);
 
   const links = el("ul", { class: "nav-links" },
-    ...NAV_LINKS.map((link) => el("li", {}, el("a", { href: `#${link.target}` }, link.label)))
+    ...NAV_LINKS.map((link) => {
+      const href = link.target === 'admin' ? (window.ADMIN_PAGE ? `#${link.target}` : 'admin.html') : `#${link.target}`;
+      return el("li", {}, el("a", { href }, link.label));
+    })
   );
 
   const cta = el("a", { href: "#contact", class: "nav-cta" }, "Get Quote");
   const ham = el("button", { id: "hamburger", class: "hamburger", type: "button", "aria-label": "Open menu" }, el("span"), el("span"), el("span"));
   ham.addEventListener("click", toggleMobileMenu);
 
-  const nav = el("nav", { id: "navbar" }, logo, links, cta, ham);
+  const navChildren = [logo, links];
+  if (window.ADMIN_PAGE) navChildren.push(el("a", { href: "index.html", class: "btn-outline" }, "Home"));
+  navChildren.push(cta, ham);
+  const nav = el("nav", { id: "navbar" }, ...navChildren);
   window.addEventListener("scroll", () => nav.classList.toggle("scrolled", window.scrollY > 50), { passive: true });
   return nav;
 }
 
 function buildMobileMenu() {
-  return el("div", { id: "mobileMenu", class: "mobile-menu" },
-    ...NAV_LINKS.map((link) => {
-      const anchor = el("a", { href: `#${link.target}` }, link.label);
-      anchor.addEventListener("click", closeMobileMenu);
-      return anchor;
-    })
-  );
+  const anchors = NAV_LINKS.map((link) => {
+    const href = link.target === 'admin' ? (window.ADMIN_PAGE ? `#${link.target}` : 'admin.html') : `#${link.target}`;
+    const anchor = el("a", { href }, link.label);
+    anchor.addEventListener("click", closeMobileMenu);
+    return anchor;
+  });
+  if (window.ADMIN_PAGE) anchors.unshift(el("a", { href: "index.html" }, "Home"));
+  return el("div", { id: "mobileMenu", class: "mobile-menu" }, ...anchors);
 }
 
 function toggleMobileMenu() {
@@ -1663,10 +1700,20 @@ function buildWhy() {
 }
 
 function buildTestimonials() {
+  const reviews = State.reviews || [];
+  if (!reviews.length) {
+    return el("section", { id: "testimonials" },
+      SectionLabel("Client Reviews"),
+      watchReveal(el("h2", { class: "section-title" }, "WHAT CLIENTS SAY")),
+      el("p", { class: "section-desc" }, "No online reviews yet. Customers may submit reviews via the Feedback form."));
+  }
+
+  const cards = reviews.slice().reverse().map((r) => watchReveal(el("div", { class: "testimonial-card" }, Stars(Math.min(5, Math.round((r.satisfaction || 80) / 20))), el("p", { class: "testimonial-text" }, `"${r.message || r.text || '—'}"`), el("div", { class: "testimonial-author" }, el("div", { class: "author-avatar" }, (r.name || "?").slice(0,2).toUpperCase()), el("div", {}, el("div", { class: "author-name" }, r.name || "Anonymous"), el("div", { class: "author-role" }, r.service || "Customer"))))));
+
   return el("section", { id: "testimonials" },
     SectionLabel("Client Reviews"),
     watchReveal(el("h2", { class: "section-title" }, "WHAT CLIENTS SAY")),
-    el("div", { class: "testimonials-grid" }, ...TESTIMONIALS.map((testimonial) => watchReveal(el("div", { class: "testimonial-card" }, Stars(), el("p", { class: "testimonial-text" }, `"${testimonial.text}"`), el("div", { class: "testimonial-author" }, el("div", { class: "author-avatar" }, testimonial.initials), el("div", {}, el("div", { class: "author-name" }, testimonial.name), el("div", { class: "author-role" }, testimonial.role)))))))
+    el("div", { class: "testimonials-grid" }, ...cards)
   );
 }
 
@@ -1793,19 +1840,19 @@ function buildAdminPortal() {
   clientForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const customerIdValue = normalizeCustomerId(clientId.value);
-    const existingIndex = State.dashboard.clients.findIndex((client) => normalizeCustomerId(client.customerId || "") === customerIdValue);
+    const existingIndex = State.customers.findIndex((client) => normalizeCustomerId(client.customerId || "") === customerIdValue);
     const payload = {
       customerId: customerIdValue,
       name: clientName.value.trim(),
       phone: clientPhone.value.trim(),
       category: clientCategory.value.trim(),
     };
-    if (existingIndex >= 0) State.dashboard.clients[existingIndex] = payload;
+    if (existingIndex >= 0) State.customers[existingIndex] = payload;
     else {
-      State.dashboard.clients.push(payload);
+      State.customers.push(payload);
       State.dashboard.stats.clients = (State.dashboard.stats.clients ?? 0) + 1;
     }
-    persistDashboardData();
+    persistCustomersData();
     refreshDashboardView();
     clientFormMsg.style.display = "block";
     clientForm.reset();
@@ -1931,6 +1978,16 @@ function buildCustomerFeedback() {
     };
 
     State.feedbacks.push(entry);
+    // ensure customer is registered in customers DB when they submit feedback
+    if (entry.customerId) {
+      const exists = State.customers.some((c) => normalizeCustomerId(c.customerId || "") === entry.customerId);
+      if (!exists) {
+        State.customers.push({ customerId: entry.customerId, name: entry.name, phone: entry.phone, category: entry.service || "" });
+        State.dashboard.stats.clients = (State.dashboard.stats.clients ?? 0) + 1;
+        persistCustomersData();
+        persistDashboardData();
+      }
+    }
     const average = Math.round(State.feedbacks.reduce((sum, item) => sum + Number(item.satisfaction || 0), 0) / State.feedbacks.length);
     State.dashboard.stats.satisfaction = average;
     persistFeedbackData();
@@ -1943,6 +2000,25 @@ function buildCustomerFeedback() {
     satisfaction.value = "100";
     satisfactionLabel.textContent = "100% satisfaction";
     setTimeout(() => { feedbackMsg.style.display = "none"; }, 2200);
+  });
+
+  // Also store review entries into the `reviews` database so testimonials show only when submitted online
+  form.addEventListener("submit", (event) => {
+    // entry object is created above; reuse the same values via form elements
+    const review = {
+      customerId: normalizeCustomerId(customerId.value),
+      name: customerName.value.trim() || "Anonymous",
+      phone: customerPhone.value.trim(),
+      service: serviceType.value.trim(),
+      satisfaction: Math.max(1, Math.min(100, parseInt(satisfaction.value || "100", 10))),
+      message: message.value.trim(),
+      createdAt: new Date().toISOString(),
+    };
+    // prevent duplicates by customerId
+    if (review.customerId && !State.reviews.some((r) => normalizeCustomerId(r.customerId || "") === review.customerId)) {
+      State.reviews.push(review);
+      persistReviewsData();
+    }
   });
 
   const overview = el("div", { class: "feedback-overview" },
@@ -2030,7 +2106,11 @@ function buildFooter() {
   );
 
   const targets = ["about", "products", "services", "gallery", "testimonials", "admin", "feedback", "contact"];
-  const quickLinks = ["About Us", "Products", "Services", "Gallery", "Testimonials", "Admin", "Feedback", "Contact"].map((label, index) => el("a", { href: `#${targets[index]}` }, label));
+  const quickLinks = ["About Us", "Products", "Services", "Gallery", "Testimonials", "Admin", "Feedback", "Contact"].map((label, index) => {
+    const target = targets[index];
+    const href = target === 'admin' ? (window.ADMIN_PAGE ? `#${target}` : 'admin.html') : `#${target}`;
+    return el("a", { href }, label);
+  });
   const productLinks = ["Rolling Shutter", "Automatic Shutter", "Grill Shutter", "Boom Barrier", "Sliding Gate Motor", "Glass Door Fittings"].map((label) => el("a", { href: "#products" }, label));
 
   return el("footer", {},
@@ -2092,6 +2172,85 @@ function initParticles() {
     requestAnimationFrame(tick);
   };
   tick();
+}
+
+function initLiquidEffect() {
+  const hero = document.getElementById("hero");
+  if (!hero) return;
+  if (document.getElementById("liquidOverlay")) return;
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("id", "liquidOverlay");
+  svg.setAttribute("viewBox", "0 0 100 100");
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.style.position = "absolute";
+  svg.style.inset = "0";
+  svg.style.width = "100%";
+  svg.style.height = "100%";
+  svg.style.zIndex = "1";
+  svg.style.pointerEvents = "none";
+  svg.style.opacity = "0.34";
+  svg.style.mixBlendMode = "overlay";
+
+  const defs = document.createElementNS(svgNS, "defs");
+  const filter = document.createElementNS(svgNS, "filter");
+  filter.setAttribute("id", "liquidFilter");
+
+  const turb = document.createElementNS(svgNS, "feTurbulence");
+  turb.setAttribute("type", "fractalNoise");
+  turb.setAttribute("baseFrequency", "0.014 0.018");
+  turb.setAttribute("numOctaves", "3");
+  turb.setAttribute("result", "turb");
+
+  const disp = document.createElementNS(svgNS, "feDisplacementMap");
+  disp.setAttribute("in", "SourceGraphic");
+  disp.setAttribute("in2", "turb");
+  disp.setAttribute("scale", "32");
+
+  filter.appendChild(turb);
+  filter.appendChild(disp);
+  defs.appendChild(filter);
+
+  const grad = document.createElementNS(svgNS, "linearGradient");
+  grad.setAttribute("id", "liquidGrad");
+  grad.setAttribute("x1", "0%");
+  grad.setAttribute("y1", "0%");
+  grad.setAttribute("x2", "100%");
+  grad.setAttribute("y2", "100%");
+  const stop1 = document.createElementNS(svgNS, "stop"); stop1.setAttribute("offset", "0%"); stop1.setAttribute("stop-color", "#003338"); stop1.setAttribute("stop-opacity", "0.0");
+  const stop2 = document.createElementNS(svgNS, "stop"); stop2.setAttribute("offset", "50%"); stop2.setAttribute("stop-color", "#2ea7ff"); stop2.setAttribute("stop-opacity", "0.6");
+  const stop3 = document.createElementNS(svgNS, "stop"); stop3.setAttribute("offset", "100%"); stop3.setAttribute("stop-color", "#3ddc84"); stop3.setAttribute("stop-opacity", "0.6");
+  grad.appendChild(stop1); grad.appendChild(stop2); grad.appendChild(stop3);
+  defs.appendChild(grad);
+
+  svg.appendChild(defs);
+
+  const rect = document.createElementNS(svgNS, "rect");
+  rect.setAttribute("x", "0");
+  rect.setAttribute("y", "0");
+  rect.setAttribute("width", "100%");
+  rect.setAttribute("height", "100%");
+  rect.setAttribute("fill", "url(#liquidGrad)");
+  rect.setAttribute("filter", "url(#liquidFilter)");
+  svg.appendChild(rect);
+
+  const heroContent = hero.querySelector(".hero-content");
+  hero.insertBefore(svg, heroContent);
+
+  let t = 0;
+  function animate() {
+    t += 0.01;
+    const bf1 = 0.014 + Math.sin(t * 1.5) * 0.006;
+    const bf2 = 0.018 + Math.cos(t * 1.1) * 0.006;
+    try {
+      turb.setAttribute("baseFrequency", `${bf1} ${bf2}`);
+      disp.setAttribute("scale", `${26 + Math.sin(t * 2.2) * 22}`);
+    } catch (e) {
+      // ignore if elements removed
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
 }
 
 function runLoader(onComplete) {
@@ -2174,12 +2333,32 @@ function init() {
   injectStyles();
   document.documentElement.style.scrollBehavior = "smooth";
   document.body.style.overflow = "hidden";
-
   const loader = buildLoader();
   const nav = buildNav();
   const mobileMenu = buildMobileMenu();
   const modal = buildModal();
   const floatingBtns = buildFloatingBtns();
+
+  // Admin page mode: show intro then require login before revealing admin portal
+  if (window.ADMIN_PAGE) {
+    const mainAdmin = el("main", {}, buildHero());
+    document.body.insertBefore(loader, document.body.firstChild);
+    root.append(nav, mobileMenu, mainAdmin, modal, floatingBtns);
+
+    runLoader(() => {
+      document.body.style.overflow = "";
+      animateHero();
+      initParticles();
+      initLiquidEffect();
+      showAdminLogin(() => {
+        // on success - replace main with hero + admin portal
+        const newMain = el("main", {}, buildHero(), buildAdminPortal());
+        mainAdmin.replaceWith(newMain);
+        refreshDashboardView();
+      });
+    });
+    return;
+  }
 
   const main = el("main", {},
     buildHero(),
@@ -2192,7 +2371,6 @@ function init() {
     buildTestimonials(),
     buildGallery(),
     buildFAQ(),
-    buildAdminPortal(),
     buildCustomerFeedback(),
     buildContact(),
     buildFooter()
@@ -2207,7 +2385,49 @@ function init() {
     document.body.style.overflow = "";
     animateHero();
     initParticles();
+    initLiquidEffect();
   });
+}
+
+function showAdminLogin(onSuccess) {
+  // Simple login overlay that matches site theme
+  const overlay = el("div", { class: "modal-overlay open", id: "adminLoginOverlay", style: { zIndex: 2000, display: "grid", placeItems: "center" } },
+    el("div", { class: "modal-box", style: { width: "min(520px, 92%)", textAlign: "left" } },
+      el("h3", { class: "modal-title" }, "Admin Login"),
+      el("p", { class: "section-desc" }, "Enter administrator credentials to access the Admin Data Hub."),
+      el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminUser" }, "Username"), el("input", { id: "adminUser", class: "form-input", placeholder: "admin" })),
+      el("div", { class: "form-group" }, el("label", { class: "form-label", for: "adminPass" }, "Password"), el("input", { id: "adminPass", class: "form-input", type: "password", placeholder: "••••••" })),
+      el("div", { style: { display: "flex", gap: "0.6rem", marginTop: "0.6rem" } }, el("button", { class: "btn-primary", id: "adminLoginBtn" }, "Sign in"), el("button", { class: "btn-outline", id: "adminCancelBtn" }, "Cancel")),
+      el("div", { class: "form-success", id: "loginError", style: { display: "none", marginTop: "0.8rem" } }, "Invalid credentials")
+    )
+  );
+
+  document.body.appendChild(overlay);
+
+  // admin credentials come from State.admins (persisted). If none exist, provision a default account.
+  let adminCreds = { user: "admin", pass: "admin123" };
+  if (Array.isArray(State.admins) && State.admins.length) {
+    adminCreds = State.admins[0];
+  } else {
+    State.admins = [adminCreds];
+    persistAdminsData();
+  }
+
+  const attemptLogin = () => {
+    const user = document.getElementById("adminUser").value.trim();
+    const pass = document.getElementById("adminPass").value.trim();
+    if (user === adminCreds.user && pass === adminCreds.pass) {
+      overlay.remove();
+      onSuccess?.();
+    } else {
+      const err = document.getElementById("loginError");
+      err.style.display = "block";
+      setTimeout(() => { err.style.display = "none"; }, 2200);
+    }
+  };
+
+  document.getElementById("adminLoginBtn").addEventListener("click", attemptLogin);
+  document.getElementById("adminCancelBtn").addEventListener("click", () => { overlay.remove(); });
 }
 
 document.addEventListener("DOMContentLoaded", init);
