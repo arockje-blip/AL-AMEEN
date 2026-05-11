@@ -768,14 +768,14 @@ function injectStyles() {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.55rem 0.9rem;
-      border: 1px solid rgba(61, 220, 132, 0.22);
-      background: rgba(61, 220, 132, 0.08);
-      color: #baf3d0;
+      padding: 0.65rem 1.1rem;
+      border: 2px solid var(--accent);
+      background: rgba(0, 208, 132, 0.1);
+      color: var(--accent);
       border-radius: 999px;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       font-weight: 700;
       margin-bottom: 1rem;
     }
@@ -1062,18 +1062,19 @@ function injectStyles() {
       opacity: 1;
     }
     .modal-box {
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
+      border: 2px solid var(--accent);
       border-radius: 28px;
       padding: 2rem;
       backdrop-filter: blur(12px);
-      box-shadow: 0 32px 64px rgba(0,0,0,0.4);
+      box-shadow: 0 32px 64px rgba(0,0,0,0.08);
     }
     .modal-title {
       margin: 0 0 1rem;
       font-size: 1.6rem;
       letter-spacing: -0.03em;
       text-transform: uppercase;
+      color: var(--text);
     }
     .modal-close {
       position: absolute;
@@ -1547,11 +1548,11 @@ function injectStyles() {
     }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .form-group { display: grid; gap: 0.45rem; }
-    .form-label { color: #dfece7; font-weight: 700; font-size: 0.92rem; }
+    .form-label { color: var(--text); font-weight: 700; font-size: 0.92rem; }
     .form-input, .form-select, .form-textarea {
       width: 100%;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.04);
+      border: 2px solid var(--line);
+      background: rgba(255,255,255,0.8);
       color: var(--text);
       border-radius: 16px;
       padding: 0.95rem 1rem;
@@ -1559,17 +1560,18 @@ function injectStyles() {
       transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
     }
     .form-input:focus, .form-select:focus, .form-textarea:focus {
-      border-color: rgba(61,220,132,0.42);
-      background: rgba(255,255,255,0.06);
+      border-color: var(--accent);
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 0 24px rgba(0, 208, 132, 0.2);
     }
     .form-textarea { min-height: 140px; resize: vertical; }
     .form-success {
       display: none;
       padding: 0.9rem 1rem;
       border-radius: 16px;
-      background: rgba(61,220,132,0.12);
-      border: 1px solid rgba(61,220,132,0.18);
-      color: #d8fae5;
+      background: rgba(0, 208, 132, 0.12);
+      border: 2px solid var(--accent);
+      color: var(--accent);
       font-weight: 700;
     }
     .map-frame { margin-top: 1rem; padding: 0.9rem; overflow: hidden; }
@@ -1587,8 +1589,8 @@ function injectStyles() {
       gap: 1rem;
     }
     .admin-card, .feedback-card, .data-card {
-      border: 1px solid rgba(255,255,255,0.08);
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+      border: 2px solid rgba(0, 208, 132, 0.15);
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.90));
       box-shadow: var(--shadow);
       backdrop-filter: blur(12px);
       border-radius: 24px;
