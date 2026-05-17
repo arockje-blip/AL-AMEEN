@@ -734,28 +734,38 @@ function injectStyles() {
       --radius-sm: 16px;
       --max: 1200px;
     }
-
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0a0e14;
+        --bg2: #0f1319;
+        --panel: rgba(20, 28, 38, 0.88);
+        --panel-strong: rgba(25, 35, 48, 0.92);
+        --line: rgba(0, 208, 132, 0.12);
+        --text: #e8f0f7;
+        --muted: rgba(232, 240, 247, 0.68);
+        --muted-2: rgba(232, 240, 247, 0.52);
+      }
+    }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      background:
-        radial-gradient(circle at top left, rgba(0, 208, 132, 0.08), transparent 30%),
-        radial-gradient(circle at top right, rgba(255, 149, 0, 0.06), transparent 24%),
-        linear-gradient(180deg, #ffffff 0%, var(--bg) 46%, #f0f3f9 100%);
+      padding: 0;
+      min-height: 100vh;
       color: var(--text);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      overflow-x: hidden;
+      background:
+        radial-gradient(circle at top left, rgba(0, 208, 132, 0.12), transparent 25%),
+        radial-gradient(circle at top right, rgba(0, 102, 255, 0.08), transparent 22%),
+        linear-gradient(180deg, #ffffff 0%, var(--bg) 45%, var(--bg2) 100%);
     }
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 42px 42px;
-      opacity: 0.5;
-      mask-image: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+    @media (prefers-color-scheme: dark) {
+      body {
+        background:
+          radial-gradient(circle at top left, rgba(0, 208, 132, 0.08), transparent 30%),
+          radial-gradient(circle at top right, rgba(0, 102, 255, 0.06), transparent 25%),
+          linear-gradient(180deg, #0a0e14 0%, #0f1319 50%, #05070c 100%);
+      }
     }
     a { color: inherit; text-decoration: none; }
     img, svg, canvas { display: block; }
@@ -916,9 +926,16 @@ function injectStyles() {
       width: min(100%, 100vw);
       padding: 1rem clamp(1rem, 2vw, 2rem);
       transition: background 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease;
+      background: rgba(245, 247, 250, 0.85);
+      backdrop-filter: blur(12px);
+    }
+    @media (prefers-color-scheme: dark) {
+      nav#navbar {
+        background: rgba(15, 19, 25, 0.88);
+      }
     }
     nav#navbar.scrolled {
-      background: rgba(5, 11, 16, 0.72);
+      background: rgba(5, 11, 16, 0.88);
       backdrop-filter: blur(18px);
       box-shadow: 0 8px 40px rgba(0, 0, 0, 0.26);
       border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -1457,7 +1474,7 @@ function injectStyles() {
       color: #ffffff;
     }
     .product-name { font-size: 1.2rem; }
-    .product-desc, .service-text, .testimonial-text, .why-item-desc, .gallery-note, .footer-tagline, .footer-credit, .contact-value, .modal-desc, .faq-a p {
+    .product-desc, .service-text, .testimonial-text, .why-item-desc, .gallery-note, .footer-credit, .contact-value, .modal-desc, .faq-a p {
       margin: 0;
       color: #d4e8f7;
       line-height: 1.7;
@@ -1842,8 +1859,8 @@ function injectStyles() {
       gap: 1rem;
       padding: 1.3rem;
       border-radius: 28px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--panel);
+      border: 1px solid var(--line);
     }
     .footer-logo {
       display: inline-flex;
@@ -1854,18 +1871,22 @@ function injectStyles() {
     .footer-logo-text { font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; }
     .footer-social { display: flex; gap: 0.7rem; margin-top: 1rem; }
     .footer-social-btn { width: 48px; height: 48px; border-radius: 999px; background: rgba(61,220,132,0.11); color: var(--accent); border: 1px solid rgba(61,220,132,0.16); }
+    .footer-tagline { color: var(--muted); font-weight: 500; line-height: 1.6; margin: 0; }
     .footer-links { display: grid; gap: 0.65rem; margin-top: 0.8rem; }
-    .footer-links a { color: var(--muted); transition: color 0.2s ease; }
-    .footer-links a:hover { color: var(--text); }
+    .footer-links a { color: var(--text); font-weight: 500; transition: color 0.2s ease; }
+    .footer-links a:hover { color: var(--accent); font-weight: 600; }
+    .footer-copyright, .footer-credit { color: var(--muted); font-weight: 500; }
     .footer-bottom {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       gap: 0.75rem 1rem;
       padding: 1rem 0 0;
-      color: var(--muted-2);
+      color: rgba(26, 35, 50, 0.8);
+      border-top: 1px solid rgba(0, 208, 132, 0.08);
+      padding-top: 1.2rem;
     }
-    .footer-copyright, .footer-credit { margin: 0; }
+    .footer-copyright, .footer-credit { margin: 0; font-weight: 500; font-size: 0.95rem; line-height: 1.5; }
 
     .floating-btns {
       position: fixed;
@@ -2184,32 +2205,6 @@ function buildIntroCards() {
   return el("section", { id: "intro-cards", class: "intro-cards-section" }, cards);
 }
 
-function buildSampleSection() {
-  const samples = [
-    { src: "images/highspeedrapiddoor.jpg", label: "High Speed Rapid Door" },
-    { src: "images/automaticboombarriers.jpg", label: "Automatic Boom Barrier" },
-    { src: "images/rollingshuttersidemotar.jpg", label: "Rolling Shutter Side Motor" },
-    { src: "images/grillshutter.jpg", label: "Grill Shutter" },
-  ];
-
-  return el("section", { class: "sample-section" },
-    el("div", { class: "sample-panel" },
-      SectionLabel("Samples"),
-      watchReveal(el("h2", { class: "section-title" }, "PROJECT GALLERY")),
-      watchReveal(el("p", { class: "section-desc" }, "Sample pictures from the work we do. Open the full gallery to view every photo in one place.")),
-      el("div", { class: "sample-grid" }, ...samples.map((sample) =>
-        watchReveal(el("div", { class: "sample-card" },
-          el("img", { src: sample.src, alt: sample.label, loading: "lazy" }),
-          el("p", {}, sample.label)
-        ))
-      )),
-      el("div", { class: "sample-actions" },
-        el("a", { href: "gallery.html", class: "gallery-link-btn" }, svg(ICONS.image), "Open Main Gallery")
-      )
-    )
-  );
-}
-
 function buildProductCard(product, index) {
   const card = el("div", { class: "product-card" },
     el("div", { class: "product-icon" }, svg(ICONS.shutter)),
@@ -2346,19 +2341,29 @@ function buildTestimonials() {
   );
 }
 
-function buildGallery() {
-  const items = ["Rolling Shutter Project", "Automatic Shutter", "Grill Shutter", "Boom Barrier", "Sliding Gate", "Commercial Project"].map((label) =>
-    watchReveal(el("div", { class: "gallery-item" },
-      el("div", { class: "gallery-placeholder" }, svg(ICONS.image), el("p", {}, label)),
-      el("div", { class: "gallery-overlay" }, svg(ICONS.eye))
-    ))
-  );
-  return el("section", { id: "gallery" },
-    SectionLabel("Our Work"),
-    watchReveal(el("h2", { class: "section-title" }, "PROJECT GALLERY")),
-    watchReveal(el("p", { class: "section-desc" }, "Showcasing installations across Salem and surrounding districts")),
-    el("div", { class: "gallery-grid" }, ...items),
-    el("p", { class: "gallery-note" }, "Gallery displays actual project photos once connected to CMS")
+function buildSampleSection() {
+  const samples = [
+    { src: "images/highspeedrapiddoor.jpg", label: "High Speed Rapid Door" },
+    { src: "images/automaticboombarriers.jpg", label: "Automatic Boom Barrier" },
+    { src: "images/rollingshuttersidemotar.jpg", label: "Rolling Shutter Side Motor" },
+    { src: "images/grillshutter.jpg", label: "Grill Shutter" },
+  ];
+
+  return el("section", { class: "sample-section" },
+    el("div", { class: "sample-panel" },
+      SectionLabel("Samples"),
+      watchReveal(el("h2", { class: "section-title" }, "PROJECT GALLERY")),
+      watchReveal(el("p", { class: "section-desc" }, "Sample pictures from the work we do. Open the full gallery to view every photo in one place.")),
+      el("div", { class: "sample-grid" }, ...samples.map((sample) =>
+        watchReveal(el("div", { class: "sample-card" },
+          el("img", { src: sample.src, alt: sample.label, loading: "lazy" }),
+          el("p", {}, sample.label)
+        ))
+      )),
+      el("div", { class: "sample-actions" },
+        el("a", { href: "gallery.html", class: "gallery-link-btn" }, svg(ICONS.image), "Open Main Gallery")
+      )
+    )
   );
 }
 
@@ -3147,14 +3152,13 @@ function init() {
     buildHero(),
     buildMarquee(),
     buildIntroCards(),
-    buildSampleSection(),
     buildAbout(),
     buildProducts(),
+    buildSampleSection(),
     buildServices(),
     buildCounters(),
     buildWhy(),
     buildTestimonials(),
-    buildGallery(),
     buildFAQ(),
     buildCustomerFeedback(),
     buildContact(),

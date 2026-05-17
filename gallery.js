@@ -1,3 +1,12 @@
+// Featured samples displayed on the samples section
+const FEATURED_ITEMS = [
+  { src: 'images/highspeedrapiddoor.jpg', title: 'High Speed Rapid Door', text: 'Fast cycle industrial door.' },
+  { src: 'images/automaticboombarriers.jpg', title: 'Automatic Boom Barrier', text: 'Access control at entry points.' },
+  { src: 'images/rollingshuttersidemotar.jpg', title: 'Rolling Shutter Side Motor', text: 'Side-mounted automation setup.' },
+  { src: 'images/grillshutter.jpg', title: 'Grill Shutter', text: 'Security with ventilation.' },
+];
+
+// Complete gallery for when user clicks "Open Main Gallery"
 const GALLERY_ITEMS = [
   { src: 'images/automaticboombarriers.jpg', title: 'Automatic Boom Barrier', text: 'Access control at entry points.' },
   { src: 'images/automaticcentermotar.jpg', title: 'Automatic Center Motor', text: 'Smooth and reliable automation.' },
@@ -37,11 +46,9 @@ const GALLERY_ITEMS = [
 ];
 
 const grid = document.getElementById('galleryGrid');
-const count = document.getElementById('imageCount');
 
-count.textContent = String(GALLERY_ITEMS.length);
-
-grid.innerHTML = GALLERY_ITEMS.map((item) => `
+// Initially display featured items
+grid.innerHTML = FEATURED_ITEMS.map((item) => `
   <article class="card">
     <img src="${item.src}" alt="${item.title}" loading="lazy" />
     <div class="meta">
@@ -50,3 +57,24 @@ grid.innerHTML = GALLERY_ITEMS.map((item) => `
     </div>
   </article>
 `).join('');
+
+// Handle "Open Main Gallery" button click
+const mainButton = document.querySelector('.actions .btn-primary');
+if (mainButton) {
+  mainButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    grid.innerHTML = GALLERY_ITEMS.map((item) => `
+      <article class="card">
+        <img src="${item.src}" alt="${item.title}" loading="lazy" />
+        <div class="meta">
+          <h2>${item.title}</h2>
+          <p>${item.text}</p>
+        </div>
+      </article>
+    `).join('');
+    mainButton.textContent = 'Showing Full Gallery (' + GALLERY_ITEMS.length + ' items)';
+    mainButton.style.pointerEvents = 'none';
+    mainButton.style.opacity = '0.6';
+    document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+  });
+}

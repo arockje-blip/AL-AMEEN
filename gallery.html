@@ -7,7 +7,7 @@
     <title>Al Ameen Project Gallery</title>
     <style>
       :root {
-        color-scheme: light;
+        color-scheme: light dark;
         --bg: #f5f7fa;
         --bg2: #edf2f7;
         --panel: rgba(25, 50, 70, 0.88);
@@ -20,6 +20,15 @@
         --accent3: #ff9500;
         --max: 1200px;
       }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0a0e14;
+          --bg2: #0f1319;
+          --line: rgba(0, 208, 132, 0.15);
+          --text: #e8f0f7;
+          --muted: rgba(232, 240, 247, 0.65);
+        }
+      }
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; }
       body {
@@ -31,6 +40,14 @@
           radial-gradient(circle at top left, rgba(0, 208, 132, 0.12), transparent 25%),
           radial-gradient(circle at top right, rgba(0, 102, 255, 0.08), transparent 22%),
           linear-gradient(180deg, #ffffff 0%, var(--bg) 45%, var(--bg2) 100%);
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background:
+            radial-gradient(circle at top left, rgba(0, 208, 132, 0.08), transparent 30%),
+            radial-gradient(circle at top right, rgba(0, 102, 255, 0.06), transparent 25%),
+            linear-gradient(180deg, #0a0e14 0%, #0f1319 50%, #05070c 100%);
+        }
       }
       a { color: inherit; text-decoration: none; }
       img { display: block; width: 100%; }
@@ -94,10 +111,11 @@
         letter-spacing: -0.06em;
         text-transform: uppercase;
         max-width: 10ch;
+        color: var(--text);
       }
       .hero p {
         max-width: 66ch;
-        color: rgba(26, 35, 50, 0.76);
+        color: var(--muted);
         line-height: 1.8;
         font-size: 1.02rem;
       }
@@ -119,6 +137,9 @@
       }
       .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 12px 28px rgba(0, 208, 132, 0.22); }
       .btn-ghost { background: rgba(255,255,255,0.6); border-color: rgba(15,23,42,0.08); color: var(--text); }
+      @media (prefers-color-scheme: dark) {
+        .btn-ghost { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); color: #e8f0f7; }
+      }
       .gallery-shell {
         margin: 1.5rem 0 4rem;
         padding: 1.4rem;
@@ -150,8 +171,8 @@
       .card {
         overflow: hidden;
         border-radius: 22px;
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: linear-gradient(180deg, rgba(25, 50, 70, 0.92), rgba(20, 42, 60, 0.88));
+        border: 1px solid rgba(0, 208, 132, 0.12);
         transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
       }
@@ -189,8 +210,162 @@
         .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
       @media (max-width: 720px) {
-        .grid, .stats { grid-template-columns: 1fr; }
-        .topbar { position: static; }
+        :root {
+          --max: 100%;
+        }
+        body {
+          background:
+            radial-gradient(circle at top left, rgba(0, 208, 132, 0.08), transparent 35%),
+            radial-gradient(circle at top right, rgba(0, 102, 255, 0.06), transparent 25%),
+            linear-gradient(180deg, #ffffff 0%, var(--bg) 50%, var(--bg2) 100%);
+        }
+        @media (prefers-color-scheme: dark) {
+          body {
+            background:
+              radial-gradient(circle at top left, rgba(0, 208, 132, 0.06), transparent 35%),
+              radial-gradient(circle at top right, rgba(0, 102, 255, 0.04), transparent 30%),
+              linear-gradient(180deg, #0a0e14 0%, #0f1319 50%, #05070c 100%);
+          }
+        }
+        .wrap {
+          padding: 1rem 0.75rem;
+        }
+        .topbar {
+          position: static;
+          gap: 0.5rem;
+          padding: 0.6rem 0.75rem;
+          border-radius: 12px;
+          margin-bottom: 1rem;
+          flex-wrap: wrap;
+        }
+        .brand {
+          gap: 0.6rem;
+          font-size: 0.85rem;
+          letter-spacing: 0.12em;
+          flex: 1 1 auto;
+        }
+        .brand-mark {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+        }
+        .hero {
+          padding: 2rem 0 1.5rem;
+        }
+        h1 {
+          font-size: clamp(1.8rem, 6vw, 2.8rem);
+          margin: 0.75rem 0 0;
+          max-width: 12ch;
+        }
+        .hero p {
+          font-size: 0.95rem;
+          line-height: 1.6;
+          max-width: 50ch;
+          margin-top: 0.75rem;
+        }
+        .eyebrow {
+          font-size: 0.7rem;
+          padding: 0.45rem 0.75rem;
+          margin-bottom: 0.75rem;
+        }
+        .actions {
+          gap: 0.5rem;
+          margin-top: 1rem;
+          flex-direction: column;
+        }
+        .btn {
+          width: 100%;
+          padding: 0.85rem 1rem;
+          font-size: 0.9rem;
+          gap: 0.5rem;
+        }
+        .gallery-shell {
+          margin: 1rem 0 2rem;
+          padding: 1rem;
+          border-radius: 20px;
+        }
+        .grid, .stats { 
+          grid-template-columns: 1fr;
+          gap: 0.75rem;
+        }
+        .stat {
+          padding: 0.85rem;
+          border-radius: 14px;
+        }
+        .stat strong { 
+          font-size: 1.2rem;
+        }
+        .stat span { 
+          font-size: 0.8rem;
+        }
+        .card {
+          border-radius: 16px;
+        }
+        .meta {
+          padding: 0.85rem 0.85rem 0.9rem;
+        }
+        .meta h2 {
+          font-size: 0.9rem;
+          margin: 0 0 0.3rem;
+        }
+        .meta p {
+          font-size: 0.8rem;
+          line-height: 1.4;
+        }
+        .footer-note {
+          font-size: 0.85rem;
+          margin: 1rem 0 0;
+        }
+      }
+      @media (max-width: 480px) {
+        .wrap {
+          padding: 0.75rem;
+        }
+        .topbar {
+          flex-direction: column;
+          gap: 0.5rem;
+          padding: 0.5rem;
+        }
+        .brand {
+          width: 100%;
+          font-size: 0.8rem;
+        }
+        .topbar a:not(.brand) {
+          width: 100%;
+          text-align: center;
+        }
+        h1 {
+          font-size: clamp(1.5rem, 5vw, 2.2rem);
+          max-width: 15ch;
+        }
+        .hero {
+          padding: 1.5rem 0 1rem;
+        }
+        .hero p {
+          font-size: 0.9rem;
+        }
+        .btn {
+          font-size: 0.85rem;
+          padding: 0.75rem 0.9rem;
+        }
+        .actions {
+          gap: 0.4rem;
+        }
+        .gallery-shell {
+          padding: 0.85rem;
+        }
+        .card img {
+          border-radius: 12px;
+        }
+        .meta {
+          padding: 0.75rem 0.75rem 0.8rem;
+        }
+        .meta h2 {
+          font-size: 0.85rem;
+        }
+        .meta p {
+          font-size: 0.75rem;
+        }
       }
     </style>
   </head>
@@ -205,25 +380,18 @@
       </header>
 
       <section class="hero">
-        <span class="eyebrow">Project Gallery</span>
-        <h1>All products and photos in one place</h1>
-        <p>Browse the full collection of shutter, motor, gate, and access-control pictures in the same visual system used across the main site. The homepage shows a preview and this page holds the full set.</p>
+        <span class="eyebrow">Samples</span>
+        <h1>Project Gallery</h1>
+        <p>Sample pictures from the work we do. Open the full gallery to view every photo in one place.</p>
         <div class="actions">
-          <a class="btn btn-primary" href="#gallery">View Gallery</a>
-          <a class="btn btn-ghost" href="index.html#intro-cards">See Samples on Home</a>
+          <a class="btn btn-primary" href="#gallery">Open Main Gallery</a>
+          <a class="btn btn-ghost" href="index.html">Back to Home</a>
         </div>
       </section>
 
       <section class="gallery-shell" id="gallery">
-        <div class="stats">
-          <div class="stat"><strong id="imageCount">0</strong><span>Gallery items</span></div>
-          <div class="stat"><strong>Same</strong><span>Index theme</span></div>
-          <div class="stat"><strong>Large</strong><span>Optimized image sizing</span></div>
-        </div>
         <div class="grid" id="galleryGrid"></div>
       </section>
-
-      <p class="footer-note">Use the home page sample section for a quick preview, or open this page for the complete gallery.</p>
     </div>
     <script src="gallery.js"></script>
   </body>
